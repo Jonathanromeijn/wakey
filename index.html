@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>wakey — wake up fresh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* Dark-only by design: wakey is a considered black/white object with one orange signal — not a themeable UI */
+  :root {
+    --bg: #0a0a0a;
+    --surface: #1c1c1c;
+    --ink: #ffffff;
+    --ink-muted: #a8a8a8;
+    --border: #2c2c2c;
+    --accent: #ff5a1f;
+    --accent-2: #c9a227;
+    --accent-ink: #0a0a0a;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background-color: var(--bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-blend-mode: overlay;
+    background-repeat: repeat;
+    color: var(--ink);
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes breathe { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+  @keyframes ctaPulse {
+    0%, 100% {
+      box-shadow: 0 8px 20px -10px color-mix(in srgb, var(--accent) 70%, transparent), 0 0 0 0 color-mix(in srgb, var(--accent) 35%, transparent);
+    }
+    50% {
+      box-shadow: 0 8px 20px -10px color-mix(in srgb, var(--accent) 70%, transparent), 0 0 0 9px color-mix(in srgb, var(--accent) 0%, transparent);
+    }
+  }
+  @keyframes flipTile { 0% { transform: rotateX(0deg); } 50% { transform: rotateX(-90deg); } 100% { transform: rotateX(0deg); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+  }
+
+  .gutter { padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+
+  h1, .wordmark { font-family: "Poppins", system-ui, sans-serif; }
+  h1, p { text-wrap: balance; margin: 0; }
+
+  .hero {
+    position: relative;
+    max-width: 760px;
+    margin: 0 auto;
+    padding-block: 72px 44px;
+    text-align: center;
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: -14% 2% auto 2%;
+    height: 560px;
+    background:
+      radial-gradient(ellipse 36% 32% at 50% 22%, color-mix(in srgb, var(--accent-2) 40%, transparent), transparent 70%),
+      radial-gradient(ellipse 70% 55% at 50% 32%, color-mix(in srgb, var(--accent) 32%, transparent), transparent 70%);
+    filter: blur(70px);
+    animation: breathe 7s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .hero > * { position: relative; z-index: 1; }
+
+  .lockup { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-bottom: 32px; animation: rise .7s ease both; }
+  .wordmark { font-size: 22px; font-weight: 700; letter-spacing: -.02em; display: flex; align-items: center; gap: 8px; }
+  .wordmark svg { width: 20px; height: 14px; }
+  .lockup .tag { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-muted); }
+
+  .eyebrow {
+    font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 18px; animation: rise .7s ease both; animation-delay: .08s;
+  }
+  .headline {
+    font-size: clamp(32px, 6vw, 58px); line-height: 1.05; font-weight: 600; margin-bottom: 20px;
+    animation: rise .7s ease both; animation-delay: .16s;
+  }
+  .sub {
+    font-size: 17px; line-height: 1.55; color: var(--ink-muted); max-width: 52ch; margin: 0 auto 28px;
+    animation: rise .7s ease both; animation-delay: .24s;
+  }
+
+  .waitlist { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; animation: rise .7s ease both; animation-delay: .32s; }
+  .waitlist input {
+    font: inherit; font-size: 15px; padding: 13px 16px; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--ink); min-width: 200px; flex: 1 1 200px; max-width: 260px;
+  }
+  .waitlist input::placeholder { color: var(--ink-muted); }
+  .waitlist button {
+    position: relative; font: inherit; font-size: 15px; font-weight: 600; padding: 13px 24px; border-radius: 12px;
+    border: 0; background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 100%, white 10%), var(--accent));
+    color: var(--accent-ink); cursor: pointer; white-space: nowrap;
+    animation: ctaPulse 2.8s ease-in-out infinite;
+    transition: transform .15s ease, filter .15s ease;
+  }
+  .waitlist button:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .waitlist button:disabled { opacity: .6; cursor: default; animation: none; }
+  .waitlist button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+  .micro { font-size: 13px; color: var(--ink-muted); min-height: 1.4em; max-width: 44ch; margin: 0 auto; animation: rise .7s ease both; animation-delay: .4s; }
+  .confirm { color: var(--accent); font-weight: 600; }
+  .err { color: #ff8a65; font-weight: 600; }
+
+  .statement { position: relative; max-width: 640px; margin: 0 auto; padding-block: 36px 48px; text-align: center; }
+  .statement::before {
+    content: "";
+    position: absolute;
+    inset: 4% 18% auto 18%;
+    height: 220px;
+    background: radial-gradient(ellipse 60% 60% at 50% 45%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 70%);
+    filter: blur(50px);
+    animation: breathe 7s ease-in-out infinite;
+    animation-delay: 1.5s;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .statement > * { position: relative; z-index: 1; }
+  .flip-row { display: flex; justify-content: center; gap: 6px; margin-bottom: 28px; font-variant-numeric: tabular-nums; }
+  .flip-tile {
+    width: 58px; height: 72px; border-radius: 12px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 100%, white 5%), var(--surface));
+    border: 1px solid var(--border);
+    box-shadow: 0 12px 26px -14px rgba(0, 0, 0, .75), 0 0 22px -6px color-mix(in srgb, var(--accent) 40%, transparent);
+    display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 600;
+    font-family: "Poppins", system-ui, sans-serif; perspective: 300px;
+  }
+  .flip-tile.flip { animation: flipTile .6s ease; }
+  .flip-colon { align-self: center; font-size: 28px; color: var(--ink-muted); padding: 0 2px; }
+  .flip-caption { font-size: 16px; line-height: 1.5; color: var(--ink-muted); max-width: 42ch; margin: 0 auto; }
+
+  .features {
+    border-top: 1px solid var(--border); max-width: 900px; margin: 0 auto; padding-block: 32px;
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;
+  }
+  .feature { min-width: 0; text-align: center; font-size: 16px; font-weight: 500; line-height: 1.4; }
+  @media (max-width: 640px) { .features { grid-template-columns: 1fr; } }
+
+  footer { border-top: 1px solid var(--border); text-align: center; padding-block: 40px; }
+  footer .wordmark { justify-content: center; font-size: 15px; margin-bottom: 4px; }
+  footer .tagline { font-size: 13px; color: var(--ink-muted); }
+
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<main>
+  <section class="hero gutter">
+    <div class="lockup">
+      <span class="wordmark">wakey
+        <svg viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M2 2c2 7 14 7 16 0" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="tag">wake up fresh</span>
+    </div>
+
+    <p class="eyebrow">Phone-free alarm clock</p>
+    <h1 class="headline">The first thing you touch in the morning shouldn't be your phone.</h1>
+    <p class="sub">wakey is a phone-free alarm clock. No apps. No snooze loop. No doomscroll before breakfast.</p>
+
+    <form class="waitlist" id="waitlistForm">
+      <input type="email" placeholder="you@email.com" aria-label="Email address" required id="emailInput">
+      <input type="tel" placeholder="phone (optional)" aria-label="Phone number, optional" id="phoneInput">
+      <button type="submit" id="submitBtn">Count me in</button>
+    </form>
+    <p class="micro" id="micro">You don't read email. Neither do we. Add your number and we'll WhatsApp you instead.</p>
+  </section>
+
+  <section class="statement gutter">
+    <p class="eyebrow">A preview of wakey's display</p>
+    <div class="flip-row" aria-hidden="true">
+      <div class="flip-tile" data-digit>0</div>
+      <div class="flip-tile" data-digit>6</div>
+      <span class="flip-colon">:</span>
+      <div class="flip-tile" data-digit>1</div>
+      <div class="flip-tile" data-digit>5</div>
+    </div>
+    <p class="flip-caption">This is the first thing you'll see in the morning. Not a lock screen.</p>
+  </section>
+
+  <section class="features gutter">
+    <p class="feature">No phone required.</p>
+    <p class="feature">No subscription.</p>
+    <p class="feature">No missed alarms.</p>
+  </section>
+
+  <footer class="gutter">
+    <span class="wordmark">wakey
+      <svg viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M2 2c2 7 14 7 16 0" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+    </span>
+    <p class="tagline">wake up fresh.</p>
+  </footer>
+</main>
+
+<script>
+  (function () {
+    var SUPABASE_URL = "https://goltxxpjfazehknblwak.supabase.co";
+    var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvbHR4eHBqZmF6ZWhrbmJsd2FrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcxODY5NzQsImV4cCI6MjEwMjc2Mjk3NH0.siY6GW54aZS9VXwThtKI6r1JtVTVyWUJjTejALEYNZQ";
+
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // live-ticking flip clock, purely decorative
+    var time = { h: 6, m: 15 };
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function setDigits(str) {
+      var tiles = document.querySelectorAll('[data-digit]');
+      for (var i = 0; i < tiles.length; i++) {
+        var tile = tiles[i];
+        var next = str[i];
+        if (tile.textContent === next) continue;
+        if (reduceMotion) { tile.textContent = next; continue; }
+        tile.classList.remove('flip');
+        void tile.offsetWidth;
+        tile.classList.add('flip');
+        (function (t, v) { setTimeout(function () { t.textContent = v; }, 280); })(tile, next);
+      }
+    }
+    if (!reduceMotion) {
+      setInterval(function () {
+        time.m++;
+        if (time.m >= 60) { time.m = 0; time.h = (time.h + 1) % 24; }
+        setDigits(pad(time.h) + pad(time.m));
+      }, 4000);
+    }
+
+    var form = document.getElementById('waitlistForm');
+    var submitBtn = document.getElementById('submitBtn');
+    var micro = document.getElementById('micro');
+    var defaultMicro = micro.textContent;
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = document.getElementById('emailInput');
+      var phone = document.getElementById('phoneInput');
+      if (!email.value) return;
+
+      submitBtn.disabled = true;
+      micro.textContent = "Signing you up…";
+      micro.classList.remove('confirm', 'err');
+
+      fetch(SUPABASE_URL + "/rest/v1/wakey_waitlist", {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+          "Content-Type": "application/json",
+          "Prefer": "return=minimal"
+        },
+        body: JSON.stringify({ email: email.value.trim(), phone: phone.value.trim() || null })
+      })
+        .then(function (res) {
+          if (!res.ok) throw new Error('request failed');
+          micro.textContent = phone.value
+            ? "You're in. Expect real questions on WhatsApp, not spam."
+            : "You're in. We'll ask what you think before we ship anything.";
+          micro.classList.add('confirm');
+          email.value = '';
+          phone.value = '';
+        })
+        .catch(function () {
+          micro.textContent = "Something went wrong — try again in a moment.";
+          micro.classList.add('err');
+        })
+        .finally(function () {
+          submitBtn.disabled = false;
+        });
+    });
+  })();
+</script>
+</body>
+</html>
