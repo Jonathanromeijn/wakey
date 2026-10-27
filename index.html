@@ -122,7 +122,7 @@
     gap: 22px;
     animation: rise .5s ease both;
   }
-  .price-label, .referral-label {
+  .price-label {
     font-size: 13px;
     font-weight: 600;
     color: var(--ink-muted);
@@ -143,33 +143,6 @@
   .price-btn:hover { border-color: var(--accent); }
   .price-btn.selected { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--surface)); }
   .price-thanks { font-size: 13px; color: var(--accent); font-weight: 600; margin-top: 10px; }
-
-  .referral-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-  .referral-row input {
-    font: inherit;
-    font-size: 13px;
-    padding: 10px 14px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--ink-muted);
-    min-width: 200px;
-    max-width: 320px;
-    flex: 1 1 200px;
-  }
-  .referral-row button {
-    font: inherit;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 10px 18px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--accent);
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  .referral-row button:hover { border-color: var(--accent); }
   .err { color: #ff8a65; font-weight: 600; }
 
   .statement { position: relative; max-width: 640px; margin: 0 auto; padding-block: 36px 48px; text-align: center; }
@@ -242,7 +215,7 @@
 
     <div class="post-signup" id="postSignup" hidden>
       <div class="price-q">
-        <p class="price-label">What would feel fair to pay for wakey?</p>
+        <p class="price-label">First question already here. What would feel fair to pay for wakey?</p>
         <div class="price-options" id="priceOptions">
           <button type="button" class="price-btn" data-range="under-49">Under &euro;49</button>
           <button type="button" class="price-btn" data-range="49-79">&euro;49-79</button>
@@ -250,14 +223,6 @@
           <button type="button" class="price-btn" data-range="120-plus">&euro;120+</button>
         </div>
         <p class="price-thanks" id="priceThanks" hidden>Noted. That's useful to know.</p>
-      </div>
-
-      <div class="referral">
-        <p class="referral-label">Skip the line. Share your link.</p>
-        <div class="referral-row">
-          <input type="text" id="referralInput" readonly aria-label="Your referral link">
-          <button type="button" id="copyBtn">Copy</button>
-        </div>
       </div>
     </div>
   </section>
@@ -324,12 +289,8 @@
     var submitBtn = document.getElementById('submitBtn');
     var micro = document.getElementById('micro');
     var postSignup = document.getElementById('postSignup');
-    var referralInput = document.getElementById('referralInput');
-    var copyBtn = document.getElementById('copyBtn');
     var priceOptions = document.getElementById('priceOptions');
     var priceThanks = document.getElementById('priceThanks');
-
-    var referredBy = new URLSearchParams(window.location.search).get('ref');
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -354,13 +315,11 @@
         body: JSON.stringify({
           id: newId,
           email: email.value.trim(),
-          phone: phone.value.trim() || null,
-          referred_by: referredBy || null
+          phone: phone.value.trim() || null
         })
       })
         .then(function (res) {
           if (!res.ok) throw new Error('request failed');
-          var row = { id: newId };
           micro.textContent = phone.value
             ? "You're in. Watch WhatsApp, not your inbox."
             : "You're in. Welcome to the build.";
@@ -368,14 +327,13 @@
           email.value = '';
           phone.value = '';
 
-          referralInput.value = window.location.origin + window.location.pathname + '?ref=' + row.id;
           postSignup.hidden = false;
 
           priceOptions.querySelectorAll('.price-btn').forEach(function (btn) {
             btn.addEventListener('click', function () {
               priceOptions.querySelectorAll('.price-btn').forEach(function (b) { b.classList.remove('selected'); });
               btn.classList.add('selected');
-              fetch(SUPABASE_URL + "/rest/v1/wakey_waitlist?id=eq." + row.id, {
+              fetch(SUPABASE_URL + "/rest/v1/wakey_waitlist?id=eq." + newId, {
                 method: "PATCH",
                 headers: {
                   "apikey": SUPABASE_ANON_KEY,
@@ -386,22 +344,6 @@
                 body: JSON.stringify({ price_range: btn.dataset.range })
               }).then(function () { priceThanks.hidden = false; });
             });
-          });
-
-          copyBtn.addEventListener('click', function () {
-            function fallback() {
-              referralInput.removeAttribute('readonly');
-              referralInput.select();
-              referralInput.setAttribute('readonly', '');
-            }
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-              navigator.clipboard.writeText(referralInput.value).then(function () {
-                copyBtn.textContent = 'Copied';
-                setTimeout(function () { copyBtn.textContent = 'Copy'; }, 1800);
-              }).catch(fallback);
-            } else {
-              fallback();
-            }
           });
         })
         .catch(function () {
