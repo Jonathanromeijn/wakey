@@ -79,11 +79,9 @@
   .wk-price-thanks { margin: 0; font-size: 14px; color: var(--accent); }
 
   .wk-figure { margin: 0; display: flex; flex-direction: column; gap: 12px; min-width: 0; justify-self: end; width: 100%; }
-  .wk-figure-hero { max-width: 520px; }
   .wk-figure-build { max-width: 846px; }
-  .wk-figure-placeholder { aspect-ratio: 4 / 5; border-radius: 2px; border: 1px solid var(--border); background: linear-gradient(135deg, #1c1c1c 0%, #141414 35%, #232323 55%, #141414 75%, #1c1c1c 100%); display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px; }
-  .wk-figure-build .wk-figure-placeholder { aspect-ratio: 846 / 437; }
-  .wk-figure-placeholder span { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); }
+  .wk-figure-photo { aspect-ratio: 846 / 437; border-radius: 2px; overflow: hidden; background: var(--border); }
+  .wk-figure-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .wk-figcaption { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-faint); }
 
   /* display preview */
@@ -197,10 +195,6 @@
       </div>
     </div>
 
-    <figure class="wk-figure wk-figure-hero">
-      <div class="wk-figure-placeholder"><span class="mono">Product photography<br>coming soon</span></div>
-      <figcaption class="wk-figcaption mono"><span>Fig. 01</span><span>Brushed steel</span></figcaption>
-    </figure>
   </section>
 
   <section class="wk-display">
@@ -242,7 +236,7 @@
       <p class="wk-build-statement">Build with the ones who show up first.</p>
     </div>
     <figure class="wk-figure wk-figure-build">
-      <div class="wk-figure-placeholder"><span class="mono">Photo coming soon</span></div>
+      <div class="wk-figure-photo"><img src="assets/wakey-envelopes.webp" alt="Sealed wakey envelopes with embossed wax seals"></div>
       <figcaption class="wk-figcaption mono"><span>Fig. 02</span><span>Sealed</span></figcaption>
     </figure>
   </section>
