@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>wakey — wake up fresh</title>
+<title>wakey: wake up fresh</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  /* Dark-only by design: wakey is a considered black/white object with one orange signal — not a themeable UI */
+  /* Dark-only by design: wakey is a considered black/white object with one orange signal. Not a themeable UI */
   :root {
     --bg: #0a0a0a;
     --surface: #1c1c1c;
@@ -111,6 +111,7 @@
   .waitlist button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
   .micro { font-size: 13px; color: var(--ink-muted); min-height: 1.4em; max-width: 44ch; margin: 0 auto; animation: rise .7s ease both; animation-delay: .4s; }
   .confirm { color: var(--accent); font-weight: 600; }
+  .think-along { margin-top: 6px; animation-delay: .46s; }
   .err { color: #ff8a65; font-weight: 600; }
 
   .statement { position: relative; max-width: 640px; margin: 0 auto; padding-block: 36px 48px; text-align: center; }
@@ -141,11 +142,10 @@
   .flip-caption { font-size: 16px; line-height: 1.5; color: var(--ink-muted); max-width: 42ch; margin: 0 auto; }
 
   .features {
-    border-top: 1px solid var(--border); max-width: 900px; margin: 0 auto; padding-block: 32px;
-    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;
+    border-top: 1px solid var(--border); max-width: 640px; margin: 0 auto; padding-block: 32px;
+    text-align: center;
   }
-  .feature { min-width: 0; text-align: center; font-size: 16px; font-weight: 500; line-height: 1.4; }
-  @media (max-width: 640px) { .features { grid-template-columns: 1fr; } }
+  .build-line { font-size: 19px; font-weight: 600; line-height: 1.4; }
 
   footer { border-top: 1px solid var(--border); text-align: center; padding-block: 40px; }
   footer .wordmark { justify-content: center; font-size: 15px; margin-bottom: 4px; }
@@ -169,7 +169,7 @@
 
     <p class="eyebrow">Phone-free alarm clock</p>
     <h1 class="headline">The first thing you touch in the morning shouldn't be your phone.</h1>
-    <p class="sub">wakey is a phone-free alarm clock. No apps. No snooze loop. No doomscroll before breakfast.</p>
+    <p class="sub">wakey is a phone-free alarm clock. No apps. No subscription. No snooze loop. No doomscroll before breakfast. No missed alarms.</p>
 
     <form class="waitlist" id="waitlistForm">
       <input type="email" placeholder="you@email.com" aria-label="Email address" required id="emailInput">
@@ -177,6 +177,7 @@
       <button type="submit" id="submitBtn">Count me in</button>
     </form>
     <p class="micro" id="micro">You don't read email. Neither do we. Add your number and we'll WhatsApp you instead.</p>
+    <p class="micro think-along">We'll ask what you think before we ship anything.</p>
   </section>
 
   <section class="statement gutter">
@@ -188,13 +189,11 @@
       <div class="flip-tile" data-digit>1</div>
       <div class="flip-tile" data-digit>5</div>
     </div>
-    <p class="flip-caption">This is the first thing you'll see in the morning. Not a lock screen.</p>
+    <p class="flip-caption">This is the first thing you'll see in the morning. Not a lock screen with 20 messages on it.</p>
   </section>
 
   <section class="features gutter">
-    <p class="feature">No phone required.</p>
-    <p class="feature">No subscription.</p>
-    <p class="feature">No missed alarms.</p>
+    <p class="build-line">Build with the ones who show up first.</p>
   </section>
 
   <footer class="gutter">
@@ -266,14 +265,14 @@
         .then(function (res) {
           if (!res.ok) throw new Error('request failed');
           micro.textContent = phone.value
-            ? "You're in. Expect real questions on WhatsApp, not spam."
-            : "You're in. We'll ask what you think before we ship anything.";
+            ? "You're in. Watch WhatsApp, not your inbox."
+            : "You're in. Welcome to the build.";
           micro.classList.add('confirm');
           email.value = '';
           phone.value = '';
         })
         .catch(function () {
-          micro.textContent = "Something went wrong — try again in a moment.";
+          micro.textContent = "Something went wrong. Try again in a moment.";
           micro.classList.add('err');
         })
         .finally(function () {
