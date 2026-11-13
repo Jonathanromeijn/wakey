@@ -7,8 +7,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600&family=Instrument+Sans:wght@400;500&display=swap">
 <style>
   html, body { margin: 0; height: 100%; background: transparent; }
-  #stage { position: fixed; inset: 0; touch-action: pan-y; cursor: grab;
-    background: radial-gradient(ellipse 72% 62% at 50% 36%, #ffffff 0%, #f3f2ee 55%, #eae8e2 100%); }
+  #stage { position: fixed; inset: 0; touch-action: pan-y; cursor: grab; background: transparent; }
   #stage:active { cursor: grabbing; }
   #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 </style>
@@ -375,10 +374,10 @@
   });
   const end = () => {
     dragging = false;
-    if (moved < 6) { cycleElapsed = 0; hint.classList.remove('show'); }
+    if (moved < 6) cycleElapsed = 0;
   };
   cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
-  cv.addEventListener('click', () => { cycleElapsed = 0; hint.classList.remove('show'); });
+  cv.addEventListener('click', () => { cycleElapsed = 0; });
 
   // ---------- explode / assemble timeline ----------
   const EXPLODE_DELAY = 900, EXPLODE_DUR = 1100, HOLD_DUR = 1300, ASSEMBLE_DUR = 1100;
@@ -425,7 +424,6 @@
     if (!reduce) cycleElapsed = Math.min(CYCLE_TOTAL, cycleElapsed + dt * 1000);
     const ex = reduce ? 0 : explodeAmount(cycleElapsed);
     explodeParts.forEach(p => { p.position.copy(p.userData.rest).addScaledVector(p.userData.off, ex); });
-    if (ex < 0.02 && cycleElapsed >= CYCLE_TOTAL) hint.classList.add('show');
 
     // camera fit, zooming out slightly while exploded
     const vfov = camera.fov * Math.PI / 180, hfov = 2 * Math.atan(Math.tan(vfov / 2) * camera.aspect);
