@@ -75,7 +75,7 @@
 
   /* hero */
   .wk-hero-top { position: relative; padding-top: clamp(8px, 2vw, 20px); }
-  .wk-hero-word { position: relative; z-index: 1; margin: 0; font-family: "Archivo", sans-serif; font-weight: 800; font-stretch: 118%; font-size: clamp(76px, 17vw, 240px); line-height: .82; letter-spacing: -.045em; color: var(--ink); }
+  .wk-hero-word { position: relative; z-index: 1; margin: 0; font-family: "Archivo", sans-serif; font-weight: 800; font-stretch: 118%; font-size: clamp(92px, 25vw, 380px); line-height: .82; letter-spacing: -.045em; color: var(--ink); }
   .wk-hero-visual { position: relative; z-index: 2; width: min(560px, 86vw); aspect-ratio: 16 / 10; margin: 20px auto 0 auto; }
   .wk-hero-visual iframe { width: 100%; height: 100%; border: 0; display: block; }
   @media (min-width: 860px) {
@@ -98,6 +98,7 @@
   .wk-submit-btn:active { background: #e24c14; }
   .wk-submit-btn:disabled { opacity: .55; cursor: default; animation: none; }
   .wk-micro { margin: 0; font-size: 13px; line-height: 1.5; color: var(--ink-faint); }
+  .wk-micro-accent { margin: 0; font-size: 13px; line-height: 1.5; color: var(--accent); font-weight: 600; }
   .wk-error { margin: 0; font-size: 13px; color: #c23b10; font-weight: 600; }
 
   .wk-postsignup { display: flex; flex-direction: column; gap: 18px; border-top: 1px solid var(--border); padding-top: 18px; }
@@ -115,7 +116,7 @@
   .wk-section { padding-top: clamp(48px, 7vw, 100px); padding-bottom: clamp(48px, 7vw, 100px); }
   .wk-section-head { display: flex; flex-direction: column; gap: 12px; max-width: 640px; margin-bottom: clamp(30px, 5vw, 52px); }
   .wk-section-title { margin: 0; font-family: "Archivo", sans-serif; font-weight: 700; font-stretch: 112%; font-size: clamp(26px, 3.4vw, 44px); line-height: 1.05; letter-spacing: -.03em; color: var(--ink); }
-  .wk-section-title .wk-accent-word { color: var(--accent); }
+  .wk-accent-word { color: var(--accent); }
 
   /* recognition */
   .wk-recognition-inner { max-width: 760px; }
@@ -167,11 +168,18 @@
   .wk-spec-icon svg { width: 100%; height: 100%; display: block; }
   .wk-spec-card h3 { margin: 0; font-family: "Archivo", sans-serif; font-weight: 700; font-stretch: 108%; font-size: 17px; letter-spacing: -.01em; color: var(--ink); }
   .wk-spec-card p { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-muted); }
+  @media (max-width: 680px) {
+    .wk-specs-grid { grid-template-columns: repeat(3, 1fr); }
+    .wk-spec-card { padding: 14px 8px; gap: 8px; align-items: center; text-align: center; }
+    .wk-spec-icon { width: 24px; height: 24px; }
+    .wk-spec-card h3 { font-size: 11.5px; letter-spacing: 0; line-height: 1.2; }
+    .wk-spec-card p { display: none; }
+  }
 
   /* build */
   .wk-build-inner { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: clamp(24px, 5vw, 72px); align-items: center; }
   .wk-build-copy { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-  .wk-build-statement { margin: 0; font-family: "Archivo", sans-serif; font-weight: 800; font-stretch: 114%; font-size: clamp(26px, 4vw, 48px); line-height: 1.02; letter-spacing: -.03em; max-width: 12ch; color: var(--ink); }
+  .wk-build-copy .wk-build-statement { margin: 0; font-family: "Archivo", sans-serif; font-weight: 800; font-stretch: 114%; font-size: clamp(26px, 4vw, 48px); line-height: 1.02; letter-spacing: -.03em; max-width: 12ch; color: var(--ink); }
   .wk-build-copy p { margin: 0; font-size: 15px; line-height: 1.6; color: var(--ink-muted); max-width: 32ch; }
   .wk-figure { margin: 0; display: flex; flex-direction: column; gap: 12px; min-width: 0; justify-self: end; width: 100%; max-width: 760px; }
   .wk-figure-photo { aspect-ratio: 846 / 437; border-radius: 6px; overflow: hidden; background: var(--surface); }
@@ -250,7 +258,7 @@
               <span>&rarr;</span>
             </button>
           </form>
-          <p class="wk-micro" style="margin-top:12px;">You don't read email. Neither do we. Add your number and we'll WhatsApp you instead.</p>
+          <p class="wk-micro-accent" style="margin-top:12px;">You don't read email. Neither do we. Add your number and we'll WhatsApp you instead.</p>
           <p class="wk-error" id="formError" hidden>Something went wrong. Try again in a moment.</p>
         </div>
 
@@ -294,14 +302,14 @@
         <p>Everything else, the wake light, the schedule, the sleep timer, exists to make that one rule easy to live with, so your phone has no reason to be on your nightstand anymore.</p>
       </div>
 
-      <p class="wk-swipe-hint">Swipe &rarr;</p>
+      <p class="wk-swipe-hint">More like this &rarr;</p>
       <div class="wk-life-grid">
         <figure class="wk-life-item wk-life-run"><img src="assets/life-run.png" alt="Man stretching into a run outdoors in the early morning"><figcaption>Run before the excuses wake up.</figcaption></figure>
-        <figure class="wk-life-item wk-life-think"><img src="assets/life-thinkbigger.png" alt="Person holding up a sign that reads THINK BIGGER"><figcaption>Your first decision of the day is yours again.</figcaption></figure>
-        <figure class="wk-life-item wk-life-desk"><img src="assets/life-desk.png" alt="Focused work at a desk in the early morning"><figcaption>Deep work before the group chat does.</figcaption></figure>
+        <figure class="wk-life-item wk-life-think"><img src="assets/life-thinkbigger.png" alt="Woman stretching in bright morning light by a window"><figcaption>Your first decision of the day is yours again.</figcaption></figure>
+        <figure class="wk-life-item wk-life-desk"><img src="assets/life-desk.png" alt="Focused work at a desk in warm early morning light"><figcaption>Deep work before the group chat does.</figcaption></figure>
         <figure class="wk-life-item wk-life-studio"><img src="assets/life-studio.png" alt="Reviewing work pinned to a studio wall"><figcaption>The first hour goes to the work that matters.</figcaption></figure>
         <figure class="wk-life-item wk-life-blueprint"><img src="assets/life-blueprint.png" alt="Two people reviewing plans at a table"><figcaption>Build the thing you're building.</figcaption></figure>
-        <figure class="wk-life-item wk-life-smoothie"><img src="assets/life-smoothie.png" alt="Preparing a morning smoothie with fresh fruit"><figcaption>Coffee in silence, on your own clock.</figcaption></figure>
+        <figure class="wk-life-item wk-life-smoothie"><img src="assets/life-smoothie.png" alt="An orange mug beside a matching espresso machine"><figcaption>Coffee in silence, on your own clock.</figcaption></figure>
       </div>
 
       <p class="wk-concept-word">your <span>mornings.</span></p>
@@ -362,7 +370,7 @@
   <section class="wk-build">
     <div class="wk-section wk-container wk-build-inner">
       <div class="wk-build-copy">
-        <p class="wk-build-statement wk-split">Build with the ones who show up first.</p>
+        <p class="wk-build-statement">Build with the ones who show up <span class="wk-accent-word">first</span>.</p>
         <p>wakey exists as a working design right now, not yet in production. Everyone on this list gets asked what we build next, before we build it.</p>
       </div>
       <figure class="wk-figure">
@@ -475,6 +483,7 @@
     revealStagger('.wk-concept-grid', 'p');
     revealStagger('.wk-life-grid', '.wk-life-item', { y: 40 });
     revealStagger('.wk-specs-grid', '.wk-spec-card');
+    reveal('.wk-build-statement', { y: 30 });
     reveal('.wk-build-copy p');
     reveal('.wk-figure', { y: 36, scale: .97 });
     revealStagger('.wk-faq-list', '.wk-faq-item');
@@ -506,6 +515,28 @@
         stickyCta.classList.toggle('show', window.scrollY > window.innerHeight * .85);
       }, { passive: true });
     }
+  })();
+</script>
+<script>
+  (function () {
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var grid = document.querySelector('.wk-life-grid');
+    if (!grid || reduce) return;
+    var paused = false, resumeTimer;
+    function pause() { paused = true; clearTimeout(resumeTimer); resumeTimer = setTimeout(function () { paused = false; }, 4000); }
+    grid.addEventListener('pointerdown', pause, { passive: true });
+    grid.addEventListener('wheel', pause, { passive: true });
+    setInterval(function () {
+      if (paused || grid.scrollWidth <= grid.clientWidth + 8) return;
+      var atEnd = grid.scrollLeft + grid.clientWidth >= grid.scrollWidth - 8;
+      if (atEnd) {
+        grid.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        var item = grid.querySelector('.wk-life-item');
+        var step = item ? item.getBoundingClientRect().width + 12 : grid.clientWidth * .8;
+        grid.scrollBy({ left: step, behavior: 'smooth' });
+      }
+    }, 2600);
   })();
 </script>
 <script>
