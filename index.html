@@ -55,8 +55,12 @@
   .wk-container { max-width: 1400px; margin: 0 auto; padding-left: clamp(20px, 5vw, 64px); padding-right: clamp(20px, 5vw, 64px); }
   section + section { border-top: 1px solid var(--border); }
 
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
   /* nav */
-  .wk-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px clamp(20px, 5vw, 64px); }
+  .wk-nav { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.92); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px clamp(20px, 5vw, 64px); transition: transform .35s ease, box-shadow .2s ease; }
+  .wk-nav.wk-nav-scrolled { box-shadow: 0 1px 0 var(--border); }
+  .wk-nav.wk-nav-hide { transform: translateY(-100%); }
   .wk-nav-logo { display: flex; align-items: center; gap: 7px; font-family: "Archivo", sans-serif; font-weight: 700; font-stretch: 108%; font-size: 21px; letter-spacing: -.02em; color: var(--ink); }
   .wk-nav-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; }
   .wk-nav-links { display: flex; align-items: center; gap: clamp(16px, 3vw, 34px); }
@@ -139,9 +143,9 @@
       "desk desk studio blueprint"
       "smoothie smoothie studio blueprint";
   }
-  .wk-life-item { position: relative; border-radius: 6px; overflow: hidden; }
-  .wk-life-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .wk-life-item figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 16px 16px 14px; background: linear-gradient(to top, rgba(0,0,0,.62), rgba(0,0,0,0)); color: #fff; font-family: "Archivo", sans-serif; font-weight: 700; font-stretch: 106%; font-size: 14px; letter-spacing: -.005em; line-height: 1.25; }
+  .wk-life-item { position: relative; border-radius: 8px; overflow: hidden; background: var(--border); }
+  .wk-life-item img { position: absolute; inset: -7% 0; width: 100%; height: 114%; object-fit: cover; display: block; }
+  .wk-life-item figcaption { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; padding: 18px 18px 16px; background: linear-gradient(to top, rgba(0,0,0,.66), rgba(0,0,0,0)); color: #fff; font-family: "Archivo", sans-serif; font-weight: 700; font-stretch: 106%; font-size: 14.5px; letter-spacing: -.005em; line-height: 1.3; }
   .wk-life-run { grid-area: run; }
   .wk-life-think { grid-area: think; }
   .wk-life-desk { grid-area: desk; }
@@ -149,13 +153,10 @@
   .wk-life-blueprint { grid-area: blueprint; }
   .wk-life-smoothie { grid-area: smoothie; }
   @media (max-width: 760px) {
-    .wk-life-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 130px;
-      grid-template-areas:
-        "run think"
-        "run think"
-        "desk studio"
-        "desk blueprint"
-        "smoothie smoothie"; }
+    .wk-life-grid { display: flex; grid-template-areas: none; grid-auto-rows: unset; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; gap: 12px; padding: 2px 20px 10px; margin: 0 -20px; scrollbar-width: none; }
+    .wk-life-grid::-webkit-scrollbar { display: none; }
+    .wk-life-item { flex: 0 0 76vw; aspect-ratio: 4 / 5; scroll-snap-align: center; }
+    .wk-life-item figcaption { font-size: 16px; padding: 22px 18px 18px; }
   }
 
   /* specs */
@@ -194,11 +195,25 @@
   .wk-closing-link { display: inline-flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; color: #fff; background: var(--ink); padding: 14px 26px; border-radius: 999px; }
   .wk-closing-link:hover { background: var(--accent); color: #fff; }
 
+  /* sticky mobile cta */
+  .wk-sticky-cta { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: flex; align-items: center; justify-content: space-between; gap: 14px; background: #fff; border-top: 1px solid var(--border); padding: 13px 18px calc(13px + env(safe-area-inset-bottom)); box-shadow: 0 -10px 24px rgba(0,0,0,.06); transform: translateY(100%); transition: transform .3s cubic-bezier(.2,.8,.2,1); }
+  .wk-sticky-cta.show { transform: translateY(0); }
+  .wk-sticky-cta span { font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.3; }
+  .wk-sticky-cta span em { display: block; font-style: normal; font-weight: 400; color: var(--ink-faint); font-size: 11px; }
+  .wk-sticky-cta a { flex: none; display: inline-flex; align-items: center; gap: 8px; background: var(--ink); color: #fff; font-size: 14px; font-weight: 600; padding: 12px 20px; border-radius: 999px; }
+  @media (min-width: 860px) { .wk-sticky-cta { display: none; } }
+
   /* footer */
   .wk-footer-inner { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px; padding: 28px 0 40px; }
   .wk-footer-brand { display: flex; align-items: center; gap: 7px; font-family: "Archivo", sans-serif; font-weight: 700; font-stretch: 108%; font-size: 18px; color: var(--ink); }
   .wk-footer-tag { font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-faint); }
   .wk-footer-privacy { font-size: 12px; letter-spacing: .04em; color: var(--ink-muted); }
+
+  .wk-swipe-hint { display: none; margin: clamp(36px, 6vw, 64px) 0 14px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); }
+  @media (max-width: 760px) {
+    .wk-swipe-hint { display: block; }
+    .wk-life-grid { margin-top: 0; }
+  }
 </style>
 </head>
 <body>
@@ -278,6 +293,7 @@
         <p>Everything else, the wake light, the schedule, the sleep timer, exists to make that one rule easy to live with, so your phone has no reason to be on your nightstand anymore.</p>
       </div>
 
+      <p class="wk-swipe-hint">Swipe &rarr;</p>
       <div class="wk-life-grid">
         <figure class="wk-life-item wk-life-run"><img src="assets/life-run.png" alt="Man stretching into a run outdoors in the early morning"><figcaption>Run before the excuses wake up.</figcaption></figure>
         <figure class="wk-life-item wk-life-think"><img src="assets/life-thinkbigger.png" alt="Person holding up a sign that reads THINK BIGGER"><figcaption>Your first decision of the day is yours again.</figcaption></figure>
@@ -295,7 +311,7 @@
     <div class="wk-section wk-container">
       <div class="wk-section-head">
         <p class="wk-eyebrow">What's actually inside</p>
-        <h2 class="wk-section-title">Built around one rule, not an app full of features.</h2>
+        <h2 class="wk-section-title wk-split">Built around one rule, not an app full of features.</h2>
       </div>
       <div class="wk-specs-grid">
         <div class="wk-spec-card">
@@ -345,7 +361,7 @@
   <section class="wk-build">
     <div class="wk-section wk-container wk-build-inner">
       <div class="wk-build-copy">
-        <p class="wk-build-statement">Build with the ones who show up first.</p>
+        <p class="wk-build-statement wk-split">Build with the ones who show up first.</p>
         <p>wakey exists as a working design right now, not yet in production. Everyone on this list gets asked what we build next, before we build it.</p>
       </div>
       <figure class="wk-figure">
@@ -359,7 +375,7 @@
     <div class="wk-section wk-container">
       <div class="wk-section-head">
         <p class="wk-eyebrow">Before you ask</p>
-        <h2 class="wk-section-title">Questions worth answering upfront.</h2>
+        <h2 class="wk-section-title wk-split">Questions worth answering upfront.</h2>
       </div>
       <div class="wk-faq-list">
         <details class="wk-faq-item">
@@ -389,7 +405,7 @@
   <section class="wk-closing">
     <div class="wk-container wk-closing-inner">
       <p class="wk-eyebrow">Ready when you are</p>
-      <p class="wk-closing-statement">Your next morning doesn't have to start with a screen.</p>
+      <p class="wk-closing-statement wk-split">Your next morning doesn't have to start with a screen.</p>
       <a href="#waitlistForm" class="wk-closing-link">Count me in &rarr;</a>
     </div>
   </section>
@@ -403,6 +419,94 @@
   </div>
 </footer>
 
+<div class="wk-sticky-cta" id="stickyCta">
+  <span>Count me in<em>Phone-free alarm clock</em></span>
+  <a href="#waitlistForm">Join &rarr;</a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+  (function () {
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var hasGsap = !!window.gsap && !!window.ScrollTrigger;
+    if (!hasGsap || reduce) return;
+    gsap.registerPlugin(ScrollTrigger);
+    var EASE = 'power3.out';
+
+    function splitWords(el) {
+      var text = el.textContent;
+      el.textContent = '';
+      text.split(/(\s+)/).forEach(function (part) {
+        if (!part) return;
+        if (/^\s+$/.test(part)) { el.appendChild(document.createTextNode(' ')); return; }
+        var w = document.createElement('span');
+        w.style.cssText = 'display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em;margin-bottom:-.08em;';
+        var wi = document.createElement('span');
+        wi.style.display = 'inline-block';
+        wi.textContent = part;
+        w.appendChild(wi);
+        el.appendChild(w);
+      });
+      return el.querySelectorAll('span > span');
+    }
+
+    document.querySelectorAll('.wk-split').forEach(function (el) {
+      var words = splitWords(el);
+      gsap.from(words, { y: '104%', duration: .9, ease: EASE, stagger: .045, scrollTrigger: { trigger: el, start: 'top 88%' } });
+    });
+
+    function revealStagger(containerSel, childSel, vars) {
+      document.querySelectorAll(containerSel).forEach(function (container) {
+        var items = container.querySelectorAll(childSel);
+        if (!items.length) return;
+        gsap.from(items, Object.assign({ y: 30, opacity: 0, duration: .85, ease: EASE, stagger: .08, scrollTrigger: { trigger: container, start: 'top 87%' } }, vars || {}));
+      });
+    }
+    function reveal(sel, vars) {
+      document.querySelectorAll(sel).forEach(function (el) {
+        gsap.from(el, Object.assign({ y: 26, opacity: 0, duration: .85, ease: EASE, scrollTrigger: { trigger: el, start: 'top 90%' } }, vars || {}));
+      });
+    }
+
+    revealStagger('.wk-recognition-list', 'li');
+    reveal('.wk-recognition-tail');
+    revealStagger('.wk-concept-grid', 'p');
+    revealStagger('.wk-life-grid', '.wk-life-item', { y: 40 });
+    revealStagger('.wk-specs-grid', '.wk-spec-card');
+    reveal('.wk-build-copy p');
+    reveal('.wk-figure', { y: 36, scale: .97 });
+    revealStagger('.wk-faq-list', '.wk-faq-item');
+    reveal('.wk-closing-link');
+
+    // giant word drifts sideways while its section scrolls by
+    document.querySelectorAll('.wk-concept-word').forEach(function (g) {
+      gsap.fromTo(g, { xPercent: -3 }, { xPercent: 3, ease: 'none', scrollTrigger: { trigger: g.closest('section'), start: 'top bottom', end: 'bottom top', scrub: true } });
+    });
+
+    // subtle parallax drift on lifestyle photos
+    document.querySelectorAll('.wk-life-item img').forEach(function (img) {
+      gsap.fromTo(img, { yPercent: -6 }, { yPercent: 6, ease: 'none', scrollTrigger: { trigger: img.closest('.wk-life-item'), start: 'top bottom', end: 'bottom top', scrub: true } });
+    });
+
+    // nav: sticky, hides on scroll down, reappears on scroll up
+    var nav = document.querySelector('.wk-nav'), lastY = 0;
+    addEventListener('scroll', function () {
+      var y = window.scrollY;
+      nav.classList.toggle('wk-nav-scrolled', y > 10);
+      nav.classList.toggle('wk-nav-hide', y > 180 && y > lastY);
+      lastY = y;
+    }, { passive: true });
+
+    // mobile sticky CTA appears once the hero has scrolled by
+    var stickyCta = document.getElementById('stickyCta');
+    if (stickyCta) {
+      addEventListener('scroll', function () {
+        stickyCta.classList.toggle('show', window.scrollY > window.innerHeight * .85);
+      }, { passive: true });
+    }
+  })();
+</script>
 <script>
   (function () {
     var SUPABASE_URL = "https://goltxxpjfazehknblwak.supabase.co";
