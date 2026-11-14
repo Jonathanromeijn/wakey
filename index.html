@@ -61,7 +61,8 @@
   .wk-nav { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.92); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px clamp(20px, 5vw, 64px); transition: transform .35s ease, box-shadow .2s ease; }
   .wk-nav.wk-nav-scrolled { box-shadow: 0 1px 0 var(--border); }
   .wk-nav.wk-nav-hide { transform: translateY(-100%); }
-  .wk-nav-logo { display: flex; align-items: center; gap: 7px; font-family: "Archivo", sans-serif; font-weight: 700; font-stretch: 108%; font-size: 21px; letter-spacing: -.02em; color: var(--ink); }
+  .wk-nav-home { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .wk-nav-home:hover { color: var(--accent); }
   .wk-nav-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; }
   .wk-nav-links { display: flex; align-items: center; gap: clamp(16px, 3vw, 34px); }
   .wk-nav-links a { font-size: 13px; font-weight: 500; color: var(--ink-muted); }
@@ -219,7 +220,7 @@
 <body>
 
 <nav class="wk-nav">
-  <span class="wk-nav-logo"><span class="wk-nav-dot"></span>wakey</span>
+  <a class="wk-nav-home" href="#">Home</a>
   <div class="wk-nav-links">
     <a href="#how">How it works</a>
     <a href="#faq">FAQ</a>
