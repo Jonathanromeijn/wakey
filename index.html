@@ -141,6 +141,7 @@
   }
   .wk-life-item { position: relative; border-radius: 8px; overflow: hidden; background: var(--border); aspect-ratio: 3 / 4; }
   .wk-life-item img { position: absolute; inset: -7% 0; width: 100%; height: 114%; object-fit: cover; display: block; }
+  .wk-life-desk img { filter: brightness(.82); }
   .wk-life-item figcaption { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; padding: 18px 18px 16px; background: linear-gradient(to top, rgba(0,0,0,.66), rgba(0,0,0,0)); color: #fff; font-family: "Archivo", sans-serif; font-weight: 700; font-stretch: 106%; font-size: 14.5px; letter-spacing: -.005em; line-height: 1.3; }
   @media (max-width: 760px) {
     .wk-life-grid { display: flex; grid-template-areas: none; grid-auto-rows: unset; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; gap: 12px; padding: 2px 20px 10px; margin: 0 -20px; scrollbar-width: none; }
@@ -293,11 +294,10 @@
       <p class="wk-swipe-hint">More like this &rarr;</p>
       <div class="wk-life-grid">
         <figure class="wk-life-item wk-life-run"><img src="assets/life-run.png" alt="Man stretching into a run outdoors in the early morning"><figcaption>Run before the excuses wake up.</figcaption></figure>
-        <figure class="wk-life-item wk-life-think"><img src="assets/life-thinkbigger.png" alt="Woman stretching in bright morning light by a window"><figcaption>Your first decision of the day is yours again.</figcaption></figure>
+        <figure class="wk-life-item wk-life-think"><img src="assets/life-thinkbigger.png" alt="Man working on a laptop on a Paris balcony"><figcaption>Your first decision of the day is yours again.</figcaption></figure>
         <figure class="wk-life-item wk-life-desk"><img src="assets/life-desk.png" alt="Focused work at a desk in warm early morning light"><figcaption>Deep work before the group chat does.</figcaption></figure>
         <figure class="wk-life-item wk-life-studio"><img src="assets/life-studio.png" alt="Reviewing work pinned to a studio wall"><figcaption>The first hour goes to the work that matters.</figcaption></figure>
         <figure class="wk-life-item wk-life-blueprint"><img src="assets/life-blueprint.png" alt="Two people reviewing plans at a table"><figcaption>Build the thing you're building.</figcaption></figure>
-        <figure class="wk-life-item wk-life-smoothie"><img src="assets/life-smoothie.png" alt="An orange mug beside a matching espresso machine"><figcaption>Coffee in silence, on your own clock.</figcaption></figure>
       </div>
 
       <p class="wk-concept-word">your <span>mornings.</span></p>
