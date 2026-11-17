@@ -136,24 +136,12 @@
   .wk-concept-word span { color: var(--accent); }
 
   .wk-life-grid {
-    margin-top: clamp(36px, 6vw, 64px); display: grid; gap: 14px;
-    grid-template-columns: repeat(4, 1fr); grid-auto-rows: 70px;
-    grid-template-areas:
-      "run run think think"
-      "run run think think"
-      "desk desk think think"
-      "desk desk studio blueprint"
-      "smoothie smoothie studio blueprint";
+    margin-top: clamp(36px, 6vw, 64px); display: grid; gap: 16px;
+    grid-template-columns: repeat(3, 1fr);
   }
-  .wk-life-item { position: relative; border-radius: 8px; overflow: hidden; background: var(--border); }
+  .wk-life-item { position: relative; border-radius: 8px; overflow: hidden; background: var(--border); aspect-ratio: 3 / 4; }
   .wk-life-item img { position: absolute; inset: -7% 0; width: 100%; height: 114%; object-fit: cover; display: block; }
   .wk-life-item figcaption { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; padding: 18px 18px 16px; background: linear-gradient(to top, rgba(0,0,0,.66), rgba(0,0,0,0)); color: #fff; font-family: "Archivo", sans-serif; font-weight: 700; font-stretch: 106%; font-size: 14.5px; letter-spacing: -.005em; line-height: 1.3; }
-  .wk-life-run { grid-area: run; }
-  .wk-life-think { grid-area: think; }
-  .wk-life-desk { grid-area: desk; }
-  .wk-life-studio { grid-area: studio; }
-  .wk-life-blueprint { grid-area: blueprint; }
-  .wk-life-smoothie { grid-area: smoothie; }
   @media (max-width: 760px) {
     .wk-life-grid { display: flex; grid-template-areas: none; grid-auto-rows: unset; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; gap: 12px; padding: 2px 20px 10px; margin: 0 -20px; scrollbar-width: none; }
     .wk-life-grid::-webkit-scrollbar { display: none; }
