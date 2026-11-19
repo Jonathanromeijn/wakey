@@ -2035,7 +2035,10 @@
   );
   tablePlane.rotation.x = -Math.PI / 2;
   tablePlane.position.y = -H / 2 - 0.001;
-  tablePlane.receiveShadow = true;
+  // On the homepage the directional-light shadow reads as a harsh, stretched wedge with
+  // no surface texture to disguise it, so only let the plane receive it in showcase mode;
+  // the soft aoShadow blob below still grounds the clock on the homepage.
+  tablePlane.receiveShadow = showcaseMode;
   scene.add(tablePlane);
 
   // Zachte ambient occlusion contactschaduw direct onder de wekker
