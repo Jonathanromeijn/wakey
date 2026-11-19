@@ -81,6 +81,7 @@
     width: 100%;
     height: 100%;
     display: block;
+    touch-action: none;
   }
 
   /* Glass control panel, wakey house style: white glass + orange accent */
@@ -2117,12 +2118,17 @@
   const FRONT_ZOOM = showcaseMode ? 0.6 : 1.0;
   const BACK_ZOOM = showcaseMode ? 0.6 : 0.96;
 
-  let rotY = FRONT_ANGLE;
-  let rotTarget = FRONT_ANGLE;
-  let elev = FRONT_ELEV;
-  let elevTarget = FRONT_ELEV;
-  let zoomFactor = FRONT_ZOOM;
-  let zoomTarget = FRONT_ZOOM;
+  // In the showcase overlay, start on the back (the only side you can actually operate).
+  const startAngle = showcaseMode ? BACK_ANGLE : FRONT_ANGLE;
+  const startElev = showcaseMode ? BACK_ELEV : FRONT_ELEV;
+  const startZoom = showcaseMode ? BACK_ZOOM : FRONT_ZOOM;
+
+  let rotY = startAngle;
+  let rotTarget = startAngle;
+  let elev = startElev;
+  let elevTarget = startElev;
+  let zoomFactor = startZoom;
+  let zoomTarget = startZoom;
 
   let dragging = false;
   let pointerMoved = false;
@@ -2218,6 +2224,12 @@
     dragging = true;
     cv.setPointerCapture(e.pointerId);
   });
+
+  // Belt-and-suspenders: some mobile browsers still try to scroll the page on a vertical
+  // swipe over the canvas despite touch-action:none, especially inside an iframe. Block it
+  // outright so dragging up/down always orbits the camera instead of scrolling the page.
+  cv.addEventListener('touchstart', e => { e.preventDefault(); }, { passive: false });
+  cv.addEventListener('touchmove', e => { e.preventDefault(); }, { passive: false });
 
   cv.addEventListener('pointermove', e => {
     if (activeSliderDrag) {
@@ -2323,6 +2335,8 @@
 
   if (showcaseMode) {
     btnTop.style.display = 'none';
+    btnFront.classList.remove('active');
+    btnBack.classList.add('active');
   }
 
   function clearActiveViewButtons() {
