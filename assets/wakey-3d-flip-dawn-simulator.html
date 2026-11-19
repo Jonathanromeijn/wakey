@@ -1,0 +1,2474 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Wakey 3D — Industrieel Productontwerp</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Instrument+Sans:wght@400;500;600&display=swap">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --dawn: 0.35;
+    --bg-warm: #1e1814;
+  }
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #120f0d;
+    font-family: 'Instrument Sans', system-ui, -apple-system, sans-serif;
+    color: #f3ede4;
+    user-select: none;
+  }
+  #stage {
+    position: fixed;
+    inset: 0;
+    touch-action: none;
+    cursor: grab;
+    background:
+      radial-gradient(ellipse 75% 65% at 50% 42%,
+        rgba(56, 42, 33, 1) 0%,
+        rgba(27, 22, 19, 1) 58%,
+        rgba(15, 12, 10, 1) 100%);
+    transition: background 0.3s ease;
+  }
+  #stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 50% 34%,
+        rgba(255, 184, 108, calc(var(--dawn) * 0.48)) 0%,
+        rgba(242, 145, 65, calc(var(--dawn) * 0.22)) 38%,
+        rgba(242, 166, 90, 0) 72%);
+    mix-blend-mode: screen;
+  }
+  #stage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.65);
+  }
+  #stage:active {
+    cursor: grabbing;
+  }
+  #stage.pointer-hover {
+    cursor: pointer;
+  }
+  #stage canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Glazen bedieningspaneel */
+  .glass-panel {
+    background: rgba(24, 20, 17, 0.72);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid rgba(255, 232, 204, 0.12);
+    box-shadow:
+      0 20px 50px rgba(0, 0, 0, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .glass-pill {
+    background: rgba(255, 244, 230, 0.06);
+    border: 1px solid rgba(255, 235, 210, 0.1);
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .glass-pill:hover {
+    background: rgba(255, 244, 230, 0.13);
+    border-color: rgba(255, 220, 180, 0.26);
+    transform: translateY(-1px);
+  }
+  .glass-pill:active {
+    transform: translateY(0) scale(0.98);
+  }
+  .glass-pill.active {
+    background: linear-gradient(135deg, rgba(226, 176, 118, 0.28), rgba(186, 134, 78, 0.18));
+    border-color: rgba(235, 188, 130, 0.55);
+    color: #fff5e8;
+    box-shadow: 0 0 20px rgba(235, 178, 110, 0.18);
+  }
+
+  /* Custom range slider voor Dawn Simulator */
+  input[type="range"].dawn-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+  }
+  input[type="range"].dawn-slider::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #2b2420 0%, #9b6434 50%, #ffcf8c 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  input[type="range"].dawn-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff6ea;
+    border: 2px solid #d49b5c;
+    margin-top: -7px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 12px rgba(255, 198, 125, 0.6);
+    transition: transform 0.15s ease;
+  }
+  input[type="range"].dawn-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+  }
+  input[type="range"].dawn-slider::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #2b2420 0%, #9b6434 50%, #ffcf8c 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  input[type="range"].dawn-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff6ea;
+    border: 2px solid #d49b5c;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+  .status-dot {
+    animation: pulseGlow 2.4s infinite ease-in-out;
+  }
+</style>
+</head>
+<body>
+
+<div id="stage"></div>
+
+<!-- Subtiele merkheader linksboven -->
+<header class="fixed top-4 left-4 sm:top-6 sm:left-7 z-20 pointer-events-none flex items-center gap-3">
+  <div class="glass-panel rounded-2xl px-3.5 py-2 sm:px-4 sm:py-2.5 flex items-center gap-3">
+    <div class="w-2.5 h-2.5 rounded-full bg-amber-300 status-dot shadow-[0_0_10px_#fcd34d]" id="header-led"></div>
+    <div>
+      <div class="flex items-center gap-2">
+        <span class="font-semibold tracking-wider text-xs sm:text-sm uppercase text-amber-100/95" style="font-family: 'Archivo', sans-serif;">Wakey 3D</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-200/80 border border-amber-400/20 font-medium">MK-II Walnoot</span>
+      </div>
+      <p class="text-[11px] text-stone-400 hidden sm:block" id="hint-text">Sleep om te draaien · Scroll om te zoomen · Klik op knop of scherm</p>
+    </div>
+  </div>
+</header>
+
+<!-- Feedback toast / statusmelding -->
+<div id="toast" class="fixed top-4 right-4 sm:top-6 sm:right-7 z-20 pointer-events-none opacity-0 transition-all duration-300 translate-y-[-6px]">
+  <div class="glass-panel rounded-xl px-3.5 py-2 text-xs sm:text-sm text-amber-100/95 flex items-center gap-2">
+    <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+    <span id="toast-msg">Status bijgewerkt</span>
+  </div>
+</div>
+
+<!-- Zwevende glazen bedieningsbalk onderaan -->
+<nav aria-label="Wekker bediening" class="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 w-[94%] max-w-3xl">
+  <div class="glass-panel rounded-2xl sm:rounded-3xl p-2.5 sm:p-3.5 flex flex-col md:flex-row items-center justify-between gap-2.5 sm:gap-4">
+
+    <!-- Camera-standpunten -->
+    <div class="flex items-center gap-1.5 w-full md:w-auto justify-center">
+      <button id="btn-front" class="glass-pill active rounded-xl px-3 py-2 text-xs font-medium flex items-center gap-1.5 flex-1 md:flex-initial justify-center" title="Bekijk het mechanische flip-display">
+        <svg class="w-3.5 h-3.5 text-amber-300/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="5" width="18" height="14" rx="3"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+        </svg>
+        <span>Voorkant <span class="hidden sm:inline text-stone-400">(Flip)</span></span>
+      </button>
+
+      <button id="btn-back" class="glass-pill rounded-xl px-3 py-2 text-xs font-medium flex items-center gap-1.5 flex-1 md:flex-initial justify-center" title="Draai naar het interactieve touchscreen">
+        <svg class="w-3.5 h-3.5 text-amber-300/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="5" width="18" height="14" rx="3"/>
+          <circle cx="8" cy="12" r="2"/>
+          <path d="M14 9h4M14 12h4M14 15h2"/>
+        </svg>
+        <span>Achterkant <span class="hidden sm:inline text-stone-400">(Touch)</span></span>
+      </button>
+
+      <button id="btn-top" class="glass-pill rounded-xl px-3 py-2 text-xs font-medium flex items-center gap-1.5 flex-1 md:flex-initial justify-center" title="Bekijk de lichtstrip en draaiknop">
+        <svg class="w-3.5 h-3.5 text-amber-300/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="8"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        <span>Boven</span>
+      </button>
+    </div>
+
+    <!-- Scheidingslijn -->
+    <div class="hidden md:block w-px h-7 bg-amber-100/10"></div>
+
+    <!-- Wekkerlicht (Dawn Simulator) -->
+    <div class="flex items-center gap-2.5 w-full md:w-auto px-1">
+      <button id="btn-dawn-toggle" class="p-1.5 rounded-lg hover:bg-white/10 transition text-amber-300" title="Start of stop zonsopgang-simulatie">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        </svg>
+      </button>
+      <div class="flex flex-col flex-1 md:w-36">
+        <div class="flex justify-between text-[10px] text-stone-300 mb-1">
+          <span>Wekkerlicht</span>
+          <span id="dawn-pct" class="font-mono text-amber-200">35%</span>
+        </div>
+        <input id="dawn-slider" type="range" min="0" max="100" value="35" class="dawn-slider w-full" aria-label="Wekkerlicht intensiteit">
+      </div>
+    </div>
+
+    <!-- Scheidingslijn -->
+    <div class="hidden md:block w-px h-7 bg-amber-100/10"></div>
+
+    <!-- Tijd-simulatie & Flip-test -->
+    <div class="flex items-center gap-1.5 w-full md:w-auto justify-center">
+      <button id="btn-flip-min" class="glass-pill rounded-xl px-2.5 py-2 text-xs font-medium flex items-center gap-1.5 flex-1 md:flex-initial justify-center" title="Laat de flip-klok 1 minuut vooruit klappen">
+        <svg class="w-3.5 h-3.5 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+        <span>+1 Min</span>
+      </button>
+
+      <button id="btn-flip-hour" class="glass-pill rounded-xl px-2.5 py-2 text-xs font-medium flex items-center gap-1.5 flex-1 md:flex-initial justify-center" title="Laat uur, minuut en dag tegelijk klappen">
+        <span>+1 Uur</span>
+      </button>
+
+      <button id="btn-demo" class="glass-pill rounded-xl px-3 py-2 text-xs font-medium flex items-center gap-1.5 flex-1 md:flex-initial justify-center text-amber-200" title="Start een volledige zonsopgang- en wekkerdemo">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="6 4 20 12 6 20 6 4"/>
+        </svg>
+        <span id="demo-label">Wekker-demo</span>
+      </button>
+    </div>
+
+  </div>
+</nav>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(async function () {
+  const stage = document.getElementById('stage');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Wacht kort op Google Fonts zodat het canvas scherp tekent
+  try {
+    await Promise.race([
+      Promise.all([
+        document.fonts.load('600 100px Archivo'),
+        document.fonts.load('500 30px "Instrument Sans"')
+      ]),
+      new Promise(r => setTimeout(r, 1500))
+    ]);
+  } catch (e) {}
+
+  // ---------- Toast helper ----------
+  let toastTimeout = null;
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    const txt = document.getElementById('toast-msg');
+    txt.textContent = msg;
+    el.classList.remove('opacity-0', 'translate-y-[-6px]');
+    el.classList.add('opacity-100', 'translate-y-0');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
+      el.classList.add('opacity-0', 'translate-y-[-6px]');
+      el.classList.remove('opacity-100', 'translate-y-0');
+    }, 2400);
+  }
+
+  // ---------- Web Audio mechanisch flip-geluid (subtiel & procedureel) ----------
+  let audioCtx = null;
+  function playFlipClick(intensity = 1) {
+    try {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        audioCtx = new AC();
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      const bufSize = Math.floor(audioCtx.sampleRate * 0.022);
+      const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < bufSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufSize * 0.22));
+      }
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = buf;
+
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(1400 + Math.random() * 350, now);
+      filter.Q.value = 2.4;
+
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0.08 * intensity, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.022);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+      noise.start(now);
+    } catch (e) {}
+  }
+
+  function playRotaryTick() {
+    try {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        audioCtx = new AC();
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(920, now);
+      osc.frequency.exponentialRampToValueAtTime(280, now + 0.015);
+      gain.gain.setValueAtTime(0.04, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.015);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.016);
+    } catch (e) {}
+  }
+
+  // ---------- Renderer & Scene ----------
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+  } catch (err) {
+    stage.innerHTML = '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#f3ede4;padding:24px;text-align:center;">WebGL kon niet worden gestart in deze browser.</div>';
+    return;
+  }
+
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  stage.prepend(renderer.domElement);
+  const aniso = renderer.capabilities.getMaxAnisotropy ? renderer.capabilities.getMaxAnisotropy() : 1;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(32, (window.innerWidth || 800) / (window.innerHeight || 600), 0.1, 100);
+
+  // ---------- Procedurele Studio Environment Map (met veilige fallback) ----------
+  function buildStudioEnvironment() {
+    try {
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      pmrem.compileEquirectangularShader();
+
+      const envScene = new THREE.Scene();
+      envScene.background = new THREE.Color(0x1b1410);
+
+      const softbox1 = new THREE.Mesh(
+        new THREE.PlaneGeometry(12, 8),
+        new THREE.MeshBasicMaterial({ color: 0xffe4c4, side: THREE.DoubleSide })
+      );
+      softbox1.position.set(-8, 7, 7);
+      softbox1.lookAt(0, 0, 0);
+      envScene.add(softbox1);
+
+      const softbox2 = new THREE.Mesh(
+        new THREE.PlaneGeometry(10, 6),
+        new THREE.MeshBasicMaterial({ color: 0xb8cdf8, side: THREE.DoubleSide })
+      );
+      softbox2.position.set(9, 4, -8);
+      softbox2.lookAt(0, 0, 0);
+      envScene.add(softbox2);
+
+      const topStrip = new THREE.Mesh(
+        new THREE.PlaneGeometry(14, 3),
+        new THREE.MeshBasicMaterial({ color: 0xffd2a0, side: THREE.DoubleSide })
+      );
+      topStrip.position.set(0, 10, 0);
+      topStrip.rotation.x = Math.PI / 2;
+      envScene.add(topStrip);
+
+      const envRT = pmrem.fromScene(envScene, 0.04);
+      scene.environment = envRT.texture;
+      pmrem.dispose();
+    } catch (e) {
+      // Fallback zonder PMREM als de omgeving dit niet ondersteunt
+      scene.environment = null;
+    }
+  }
+  buildStudioEnvironment();
+
+  // ---------- Afmetingen (1 eenheid = 10 cm) ----------
+  const W = 2.8, H = 1.2, D = 0.95, R = 0.24, BV = 0.05;
+  const Wi = 2.5, Hi = 0.92;
+  const FOOT_H = 0.032; // Hoogte rubberen voetjes zodat de wekker realistisch op het oppervlak staat
+
+  function rr(p, x, y, w, h, r) {
+    p.moveTo(x + r, y);
+    p.lineTo(x + w - r, y);
+    p.quadraticCurveTo(x + w, y, x + w, y + r);
+    p.lineTo(x + w, y + h - r);
+    p.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    p.lineTo(x + r, y + h);
+    p.quadraticCurveTo(x, y + h, x, y + h - r);
+    p.lineTo(x, y + r);
+    p.quadraticCurveTo(x, y, x + r, y);
+    return p;
+  }
+  function ctxRR(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    rr(ctx, x, y, w, h, r);
+    ctx.closePath();
+  }
+
+  // ---------- Rijke Amerikaanse Walnoothout Textures (Albedo + Bump + Roughness) ----------
+  function makeWalnutTextures() {
+    const w = 1024, h = 512;
+    const colC = document.createElement('canvas'); colC.width = w; colC.height = h;
+    const bmpC = document.createElement('canvas'); bmpC.width = w; bmpC.height = h;
+    const rghC = document.createElement('canvas'); rghC.width = w; rghC.height = h;
+
+    const cg = colC.getContext('2d');
+    const bg = bmpC.getContext('2d');
+    const rg = rghC.getContext('2d');
+
+    // Warme diepe basislaag
+    const baseGrad = cg.createLinearGradient(0, 0, w, h);
+    baseGrad.addColorStop(0, '#4f2f1b');
+    baseGrad.addColorStop(0.5, '#5a3620');
+    baseGrad.addColorStop(1, '#442716');
+    cg.fillStyle = baseGrad;
+    cg.fillRect(0, 0, w, h);
+
+    bg.fillStyle = '#808080';
+    bg.fillRect(0, 0, w, h);
+
+    rg.fillStyle = '#686868'; // Zijdeglans basis
+    rg.fillRect(0, 0, w, h);
+
+    let seed = 42;
+    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+    // Organische nerven en jaarringen
+    for (let i = 0; i < 420; i++) {
+      const y0 = rnd() * h;
+      const amp = 2.5 + rnd() * 11;
+      const f = 0.0025 + rnd() * 0.007;
+      const ph = rnd() * Math.PI * 2;
+      const isDark = rnd() < 0.65;
+      const lw = 0.6 + rnd() * 3.4;
+
+      cg.strokeStyle = isDark
+        ? `rgba(26, 13, 6, ${0.09 + rnd() * 0.30})`
+        : `rgba(155, 102, 62, ${0.06 + rnd() * 0.20})`;
+      cg.lineWidth = lw;
+
+      bg.strokeStyle = isDark
+        ? `rgba(45, 45, 45, ${0.15 + rnd() * 0.25})`
+        : `rgba(200, 200, 200, ${0.1 + rnd() * 0.15})`;
+      bg.lineWidth = lw;
+
+      rg.strokeStyle = isDark
+        ? `rgba(145, 145, 145, 0.22)`
+        : `rgba(85, 85, 85, 0.18)`;
+      rg.lineWidth = lw;
+
+      [cg, bg, rg].forEach(ctx => {
+        ctx.beginPath();
+        for (let x = -10; x <= w + 10; x += 8) {
+          const y = y0
+            + Math.sin(x * f + ph) * amp
+            + Math.sin(x * f * 2.9 + ph * 1.7) * (amp * 0.28);
+          if (x < 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      });
+    }
+
+    // Fijne houtporiën
+    for (let i = 0; i < 3600; i++) {
+      const px = rnd() * w;
+      const py = rnd() * h;
+      const pw = 2 + rnd() * 9;
+      cg.fillStyle = `rgba(18, 8, 3, ${0.16 + rnd() * 0.28})`;
+      cg.fillRect(px, py, pw, 1.1);
+      bg.fillStyle = `rgba(30, 30, 30, 0.35)`;
+      bg.fillRect(px, py, pw, 1.1);
+      rg.fillStyle = `rgba(175, 175, 175, 0.3)`;
+      rg.fillRect(px, py, pw, 1.1);
+    }
+
+    const setupTex = (canvas, isSRGB) => {
+      const t = new THREE.CanvasTexture(canvas);
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.repeat.set(0.35, 0.68);
+      t.anisotropy = aniso;
+      if (isSRGB) t.encoding = THREE.sRGBEncoding;
+      return t;
+    };
+
+    return {
+      map: setupTex(colC, true),
+      bumpMap: setupTex(bmpC, false),
+      roughnessMap: setupTex(rghC, false)
+    };
+  }
+
+  const woodMaps = makeWalnutTextures();
+  const woodMat = new THREE.MeshStandardMaterial({
+    map: woodMaps.map,
+    bumpMap: woodMaps.bumpMap,
+    bumpScale: 0.005,
+    roughnessMap: woodMaps.roughnessMap,
+    roughness: 0.44,
+    metalness: 0.04
+  });
+
+  // Geborsteld messing / brons accentmateriaal
+  const brassMat = new THREE.MeshStandardMaterial({
+    color: 0xd8a86e,
+    metalness: 0.85,
+    roughness: 0.26
+  });
+
+  // Donker geanodiseerd aluminium / metaal voor as en scharnieren
+  const gunmetalMat = new THREE.MeshStandardMaterial({
+    color: 0x2a2522,
+    metalness: 0.78,
+    roughness: 0.34
+  });
+
+  // Mat zwart silicone / rubber voor voetjes en binnenwerk
+  const rubberMat = new THREE.MeshStandardMaterial({
+    color: 0x12100f,
+    roughness: 0.88,
+    metalness: 0.05
+  });
+
+  const clock = new THREE.Group();
+  clock.position.y = FOOT_H; // Rust exact op de rubberen voetjes
+  scene.add(clock);
+
+  // ---------- Houten Behuizing ----------
+  const bodyShape = rr(
+    new THREE.Shape(),
+    -(W - 2 * BV) / 2,
+    -(H - 2 * BV) / 2,
+    W - 2 * BV,
+    H - 2 * BV,
+    R - BV
+  );
+  const bodyGeo = new THREE.ExtrudeGeometry(bodyShape, {
+    depth: D - 2 * BV,
+    bevelEnabled: true,
+    bevelThickness: BV,
+    bevelSize: BV,
+    bevelSegments: 8,
+    curveSegments: 28
+  });
+  bodyGeo.translate(0, 0, -(D - 2 * BV) / 2);
+  const body = new THREE.Mesh(bodyGeo, woodMat);
+  body.castShadow = true;
+  body.receiveShadow = true;
+  clock.add(body);
+
+  // ---------- Rubberen Voetjes onderaan de behuizing ----------
+  const footGeo = new THREE.CylinderGeometry(0.11, 0.125, FOOT_H + 0.01, 24);
+  const footPositions = [
+    [-W / 2 + 0.34, -H / 2 - FOOT_H / 2 + 0.005, D / 2 - 0.22],
+    [W / 2 - 0.34, -H / 2 - FOOT_H / 2 + 0.005, D / 2 - 0.22],
+    [-W / 2 + 0.34, -H / 2 - FOOT_H / 2 + 0.005, -D / 2 + 0.22],
+    [W / 2 - 0.34, -H / 2 - FOOT_H / 2 + 0.005, -D / 2 + 0.22]
+  ];
+  footPositions.forEach(([fx, fy, fz]) => {
+    const foot = new THREE.Mesh(footGeo, rubberMat);
+    foot.position.set(fx, fy, fz);
+    foot.castShadow = true;
+    foot.receiveShadow = true;
+    clock.add(foot);
+  });
+
+  // ---------- Houten Randen + Geborstelde Messing Accent-Bezels ----------
+  function makeWoodRing() {
+    const s = rr(new THREE.Shape(), -(W - 0.15) / 2, -(H - 0.15) / 2, W - 0.15, H - 0.15, R - 0.075);
+    s.holes.push(rr(new THREE.Path(), -(Wi + 0.036) / 2, -(Hi + 0.036) / 2, Wi + 0.036, Hi + 0.036, 0.088));
+    const g = new THREE.ExtrudeGeometry(s, {
+      depth: 0.036,
+      bevelEnabled: true,
+      bevelThickness: 0.012,
+      bevelSize: 0.012,
+      bevelSegments: 4,
+      curveSegments: 24
+    });
+    const m = new THREE.Mesh(g, woodMat);
+    m.castShadow = true;
+    m.receiveShadow = true;
+    return m;
+  }
+
+  function makeBrassBezel() {
+    const outerW = Wi + 0.042, outerH = Hi + 0.042;
+    const s = rr(new THREE.Shape(), -outerW / 2, -outerH / 2, outerW, outerH, 0.092);
+    s.holes.push(rr(new THREE.Path(), -Wi / 2, -Hi / 2, Wi, Hi, 0.072));
+    const g = new THREE.ExtrudeGeometry(s, {
+      depth: 0.042,
+      bevelEnabled: true,
+      bevelThickness: 0.006,
+      bevelSize: 0.006,
+      bevelSegments: 3,
+      curveSegments: 24
+    });
+    const m = new THREE.Mesh(g, brassMat);
+    m.castShadow = true;
+    m.receiveShadow = true;
+    return m;
+  }
+
+  function roundedPlane(w, h, r) {
+    const g = new THREE.ShapeGeometry(rr(new THREE.Shape(), -w / 2, -h / 2, w, h, r), 20);
+    const pos = g.attributes.position, uv = g.attributes.uv;
+    for (let i = 0; i < pos.count; i++) {
+      uv.setXY(i, (pos.getX(i) + w / 2) / w, (pos.getY(i) + h / 2) / h);
+    }
+    return g;
+  }
+
+  const darkCavityMat = new THREE.MeshStandardMaterial({ color: 0x090807, roughness: 0.92, metalness: 0.1 });
+
+  // Voorkant frame + messing inlay
+  const ringF = makeWoodRing();
+  ringF.position.z = D / 2 - 0.012;
+  clock.add(ringF);
+
+  const bezelF = makeBrassBezel();
+  bezelF.position.z = D / 2 - 0.006;
+  clock.add(bezelF);
+
+  const winF = new THREE.Mesh(roundedPlane(Wi, Hi, 0.072), darkCavityMat);
+  winF.position.z = D / 2 + 0.004;
+  winF.receiveShadow = true;
+  clock.add(winF);
+
+  // Achterkant frame + messing inlay
+  const ringB = makeWoodRing();
+  ringB.rotation.y = Math.PI;
+  ringB.position.z = -(D / 2 - 0.012);
+  clock.add(ringB);
+
+  const bezelB = makeBrassBezel();
+  bezelB.rotation.y = Math.PI;
+  bezelB.position.z = -(D / 2 - 0.006);
+  clock.add(bezelB);
+
+  // ---------- Mechanische Flip-Kaarten ----------
+  const DAYS = ['ZO', 'MA', 'DI', 'WO', 'DO', 'VR', 'ZA'];
+  const Hc = Hi - 0.11, margin = 0.065, gap = 0.048;
+  const avail = Wi - 2 * margin - 2 * gap, unit = avail / 3.05;
+  const widths = [unit, unit * 1.3, unit * 0.75];
+
+  function cardBase(ctx, w, h) {
+    ctx.clearRect(0, 0, w, h);
+    // Rijke geanodiseerde matzwarte kaart met subtiele verlichting van boven
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, '#2f2b27');
+    g.addColorStop(0.48, '#211e1b');
+    g.addColorStop(0.52, '#1b1815');
+    g.addColorStop(1, '#12100e');
+    ctx.fillStyle = g;
+    ctxRR(ctx, 2, 2, w - 4, h - 4, 28);
+    ctx.fill();
+
+    // Fijne geborstelde textuur
+    for (let i = 0; i < 1100; i++) {
+      ctx.fillStyle = `rgba(255,250,240,${Math.random() * 0.024})`;
+      ctx.fillRect(Math.random() * w, Math.random() * h, 3, 1.5);
+    }
+
+    // Subtiele randhighlight op de kaart
+    ctx.strokeStyle = 'rgba(255, 240, 220, 0.09)';
+    ctx.lineWidth = 2;
+    ctxRR(ctx, 3, 3, w - 6, h - 6, 27);
+    ctx.stroke();
+  }
+
+  function cardSplit(ctx, w, h) {
+    // Diepe mechanische spleet met schaduw boven en glansrand onder
+    const shadowGrad = ctx.createLinearGradient(0, h / 2 - 14, 0, h / 2);
+    shadowGrad.addColorStop(0, 'rgba(0,0,0,0)');
+    shadowGrad.addColorStop(1, 'rgba(0,0,0,0.65)');
+    ctx.fillStyle = shadowGrad;
+    ctx.fillRect(2, h / 2 - 14, w - 4, 14);
+
+    ctx.fillStyle = '#050403';
+    ctx.fillRect(0, h / 2 - 3.5, w, 7);
+
+    // Highlight op de bovenrand van de onderste kaarthelft
+    ctx.fillStyle = 'rgba(255, 245, 230, 0.14)';
+    ctx.fillRect(4, h / 2 + 3.5, w - 8, 2.5);
+
+    // Uitsparingen links en rechts voor de scharnierpinnen
+    ctx.fillStyle = '#070605';
+    ctx.fillRect(0, h / 2 - 16, 14, 32);
+    ctx.fillRect(w - 14, h / 2 - 16, 14, 32);
+  }
+
+  const ink = '#f2ece1';
+  function drawDigits(ctx, w, h, key) {
+    cardBase(ctx, w, h);
+    let size = h * 0.80;
+    ctx.font = `600 ${size}px Archivo, "Helvetica Neue", Arial, sans-serif`;
+    const m = ctx.measureText(key).width;
+    if (m > w * 0.85) {
+      size *= (w * 0.85) / m;
+      ctx.font = `600 ${size}px Archivo, "Helvetica Neue", Arial, sans-serif`;
+    }
+    ctx.fillStyle = ink;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(key, w / 2, h * 0.535);
+    cardSplit(ctx, w, h);
+  }
+
+  function drawMoon(ctx, cx, cy, r, p) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.strokeStyle = 'rgba(242, 236, 225, 0.75)';
+    ctx.lineWidth = 2.8;
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.stroke();
+
+    if (p >= 0.5) ctx.scale(-1, 1);
+    const k = Math.cos(2 * Math.PI * p);
+    ctx.fillStyle = ink;
+    ctx.beginPath();
+    ctx.arc(0, 0, r, -Math.PI / 2, Math.PI / 2, false);
+    ctx.ellipse(0, 0, Math.max(0.01, r * Math.abs(k)), r, 0, Math.PI / 2, -Math.PI / 2, k > 0);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawDay(ctx, w, h, key) {
+    cardBase(ctx, w, h);
+    const [day, ph] = key.split('|');
+    ctx.font = `600 ${h * 0.19}px Archivo, "Helvetica Neue", Arial, sans-serif`;
+    ctx.fillStyle = '#d8c5a8'; // Subtiel warme tint voor de dagnaam
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(day, w / 2, h * 0.26);
+    drawMoon(ctx, w / 2, h * 0.75, w * 0.18, parseFloat(ph));
+    cardSplit(ctx, w, h);
+  }
+
+  function halves(canvas) {
+    const top = new THREE.CanvasTexture(canvas);
+    top.encoding = THREE.sRGBEncoding;
+    top.anisotropy = aniso;
+    top.repeat.set(1, 0.5);
+    top.offset.set(0, 0.5);
+
+    const bot = top.clone();
+    bot.offset.set(0, 0);
+    bot.needsUpdate = true;
+    return { top, bot };
+  }
+
+  function setMap(mesh, t) {
+    if (mesh.material.map !== t) {
+      mesh.material.map = t;
+      mesh.material.needsUpdate = true;
+    }
+  }
+
+  class Flip {
+    constructor(w, h, draw, x) {
+      this.w = w;
+      this.h = h;
+      this.draw = draw;
+      this.cache = new Map();
+      this.key = null;
+      this.anim = null;
+      this.prev = null;
+
+      this.group = new THREE.Group();
+      this.group.position.set(x, 0, D / 2 + 0.026);
+
+      const hg = new THREE.PlaneGeometry(w, h / 2);
+      const cardMat = () => new THREE.MeshStandardMaterial({
+        roughness: 0.42,
+        metalness: 0.08,
+        alphaTest: 0.5
+      });
+
+      this.top = new THREE.Mesh(hg, cardMat());
+      this.top.position.y = h / 4;
+
+      this.bot = new THREE.Mesh(hg, cardMat());
+      this.bot.position.y = -h / 4;
+
+      this.pivot = new THREE.Group();
+      this.pivot.position.z = 0.005;
+      this.pivot.visible = false;
+
+      this.fF = new THREE.Mesh(hg, cardMat());
+      this.fF.position.y = h / 4;
+
+      this.fB = new THREE.Mesh(hg, cardMat());
+      this.fB.position.y = h / 4;
+      this.fB.rotation.x = Math.PI;
+
+      this.pivot.add(this.fF, this.fB);
+
+      // Kaartenstapel achterin voor 3D-diepte
+      const stack = new THREE.Mesh(
+        new THREE.BoxGeometry(w - 0.01, h - 0.01, 0.026),
+        new THREE.MeshStandardMaterial({ color: 0x141210, roughness: 0.75 })
+      );
+      stack.position.z = -0.014;
+
+      // Subtiele kaartrandjes aan de zijkant van de stapel
+      const stackEdges = new THREE.Mesh(
+        new THREE.BoxGeometry(w - 0.004, h - 0.02, 0.018),
+        new THREE.MeshStandardMaterial({ color: 0x3b352f, roughness: 0.6 })
+      );
+      stackEdges.position.z = -0.012;
+
+      this.group.add(stack, stackEdges, this.top, this.bot, this.pivot);
+    }
+
+    tex(key) {
+      if (!this.cache.has(key)) {
+        const c = document.createElement('canvas');
+        c.height = 512;
+        c.width = Math.round(512 * this.w / this.h);
+        this.draw(c.getContext('2d'), c.width, c.height, key);
+        this.cache.set(key, halves(c));
+        if (this.cache.size > 12) {
+          for (const k of this.cache.keys()) {
+            if (k !== key && k !== this.key && k !== this.prev) {
+              const t = this.cache.get(k);
+              t.top.dispose();
+              t.bot.dispose();
+              this.cache.delete(k);
+              break;
+            }
+          }
+        }
+      }
+      return this.cache.get(key);
+    }
+
+    set(key, instant = false) {
+      if (key === this.key) return;
+      if (this.anim) this.finish();
+      const nw = this.tex(key);
+      if (this.key === null || instant || reduceMotion) {
+        setMap(this.top, nw.top);
+        setMap(this.bot, nw.bot);
+        this.key = key;
+        return;
+      }
+      const old = this.tex(this.key);
+      this.prev = this.key;
+      setMap(this.top, nw.top);
+      setMap(this.bot, old.bot);
+      setMap(this.fF, old.top);
+      setMap(this.fB, nw.bot);
+      this.pivot.rotation.x = 0;
+      this.pivot.visible = true;
+      this.anim = { t: 0, nw, clicked: false };
+      this.key = key;
+    }
+
+    finish() {
+      setMap(this.bot, this.anim.nw.bot);
+      this.pivot.visible = false;
+      this.anim = null;
+    }
+
+    update(dt) {
+      if (!this.anim) return;
+      this.anim.t += dt / 0.44;
+      const t = Math.min(1, this.anim.t);
+      // Realistische zwaartekrachtversnelling met lichte bounce aan het eind
+      let angle;
+      if (t < 0.85) {
+        const nt = t / 0.85;
+        angle = Math.PI * (nt * nt);
+      } else {
+        if (!this.anim.clicked) {
+          this.anim.clicked = true;
+          if (isSettingOn('flipSound')) playFlipClick(0.9);
+        }
+        const bt = (t - 0.85) / 0.15;
+        angle = Math.PI - Math.sin(bt * Math.PI) * 0.045;
+      }
+      this.pivot.rotation.x = angle;
+      if (t >= 1) this.finish();
+    }
+  }
+
+  let xPos = -Wi / 2 + margin;
+  const mods = widths.map((w, i) => {
+    const m = new Flip(w, Hc, i === 2 ? drawDay : drawDigits, xPos + w / 2);
+    clock.add(m.group);
+    xPos += w + gap;
+    return m;
+  });
+
+  // Realistische metalen scharnier-as en messing lagers
+  const axleGeo = new THREE.CylinderGeometry(0.011, 0.011, Wi - 0.06, 16);
+  axleGeo.rotateZ(Math.PI / 2);
+  const axle = new THREE.Mesh(axleGeo, gunmetalMat);
+  axle.position.set(0, 0, D / 2 + 0.028);
+  clock.add(axle);
+
+  let px = -Wi / 2 + margin;
+  const pegXs = [px - 0.022];
+  widths.forEach((w, i) => {
+    px += w;
+    pegXs.push(i < 2 ? px + gap / 2 : px + 0.022);
+    px += gap;
+  });
+  pegXs.forEach(p => {
+    const housing = new THREE.Mesh(new THREE.BoxGeometry(0.032, 0.085, 0.042), gunmetalMat);
+    housing.position.set(p, 0, D / 2 + 0.028);
+    clock.add(housing);
+
+    const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.038, 16), brassMat);
+    pin.rotation.z = Math.PI / 2;
+    pin.position.set(p, 0, D / 2 + 0.032);
+    clock.add(pin);
+  });
+
+  // Subtiele beschermende glasplaat voor het flip-display
+  const frontGlass = new THREE.Mesh(
+    roundedPlane(Wi, Hi, 0.072),
+    new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.05,
+      roughness: 0.08,
+      metalness: 0.85,
+      depthWrite: false
+    })
+  );
+  frontGlass.position.z = D / 2 + 0.044;
+  clock.add(frontGlass);
+
+  // ---------- Interactief Touchscreen aan de Achterkant ----------
+  const sc = document.createElement('canvas');
+  sc.width = 1400;
+  sc.height = Math.round(1400 * Hi / Wi);
+  const sx = sc.getContext('2d');
+  const screenTex = new THREE.CanvasTexture(sc);
+  screenTex.encoding = THREE.sRGBEncoding;
+  screenTex.anisotropy = aniso;
+
+  const screenMesh = new THREE.Mesh(
+    roundedPlane(Wi, Hi, 0.072),
+    new THREE.MeshBasicMaterial({ map: screenTex, toneMapped: false })
+  );
+  screenMesh.rotation.y = Math.PI;
+  screenMesh.position.z = -(D / 2 + 0.008);
+  screenMesh.name = 'touchscreen';
+  clock.add(screenMesh);
+
+  // Diepte-rand (zwarte OLED-bezel) & glaslaag met reflecties
+  const backGlass = new THREE.Mesh(
+    roundedPlane(Wi, Hi, 0.072),
+    new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.06,
+      roughness: 0.06,
+      metalness: 0.85,
+      depthWrite: false
+    })
+  );
+  backGlass.rotation.y = Math.PI;
+  backGlass.position.z = -(D / 2 + 0.014);
+  clock.add(backGlass);
+
+  // Uitgebreide Touchscreen State
+  const uiState = {
+    view: 'menu', // 'menu' | 'alarms' | 'light' | 'sound' | 'brightness' | 'schedule' | 'sleep' | 'meditation' | 'settings'
+    alarms: [
+      { id: 0, time: '07:00', label: 'Werkdag', enabled: true },
+      { id: 1, time: '07:30', label: 'Ochtendroutine', enabled: false },
+      { id: 2, time: '07:45', label: 'Laatste wekker', enabled: false },
+      { id: 3, time: '08:00', label: 'Weekend', enabled: false }
+    ],
+    soundPreset: 'Ochtendvogels',
+    sounds: [
+      { name: 'Ochtendvogels', desc: 'Zachte merel & bosgeluiden', freq: [660, 880, 740] },
+      { name: 'Haan & Boerderij', desc: 'Natuurlijk ontwaken', freq: [440, 587, 523] },
+      { name: 'Klassieke Bel', desc: 'Heldere mechanische wektoon', freq: [987, 1318, 987] },
+      { name: 'Zachte Marimba', desc: 'Warme houten klanken', freq: [523, 659, 784] },
+      { name: 'Aangepast', desc: 'Eigen geüpload geluid (Mijn_Wekker.mp3)', freq: [392, 494, 587] }
+    ],
+    brightness: 0.85,
+    schedule: [
+      { day: 'MA', planned: '07:00', actual: '07:04', status: 'ok' },
+      { day: 'DI', planned: '07:00', actual: '06:58', status: 'ok' },
+      { day: 'WO', planned: '07:00', actual: '07:12', status: 'snooze' },
+      { day: 'DO', planned: '07:00', actual: '07:01', status: 'ok' },
+      { day: 'VR', planned: '07:30', actual: '07:30', status: 'ok' },
+      { day: 'ZA', planned: '08:00', actual: '08:22', status: 'snooze' },
+      { day: 'ZO', planned: '08:00', actual: '08:05', status: 'ok' }
+    ],
+    sleepMinutes: 30,
+    sleepRunning: false,
+    sleepRemainingSec: 30 * 60,
+    meditationIndex: 0,
+    meditationActive: false,
+    meditations: [
+      { name: 'Ochtendrust & Focus', duration: '5 min', breath: '4-4-4 ritme · Heldere start' },
+      { name: 'Diepe Ademhaling', duration: '10 min', breath: '4-7-8 ontspanning · Kalmte' },
+      { name: 'Boswandeling', duration: '12 min', breath: 'Natuurgeluiden & zachte gloed' },
+      { name: 'Nachtelijke Stilte', duration: '15 min', breath: 'Langzame hartslag · Slaapvoorbereiding' }
+    ],
+    settings: [
+      { key: 'format24', label: '24-uurs tijdsnotatie', value: true },
+      { key: 'flipSound', label: 'Mechanisch flip-geluid', value: true },
+      { key: 'autoNight', label: 'Auto-nachtstand scherm', value: true },
+      { key: 'snooze9', label: 'Snooze-duur (9 min)', value: true }
+    ],
+    snoozed: false
+  };
+
+  function isSettingOn(key) {
+    const s = uiState.settings.find(s => s.key === key);
+    return s ? s.value : false;
+  }
+
+  // "Auto-nachtstand scherm": dimt het achterscherm vanzelf tussen 22:00 en 07:00
+  function nightModeActive(now) {
+    if (!isSettingOn('autoNight')) return false;
+    const h = now.getHours();
+    return h >= 22 || h < 7;
+  }
+
+  const screenHitboxes = [];
+  let activeSliderDrag = null; // 'sleep' | 'brightness' | null
+
+  function playSoundPreview(freqs) {
+    try {
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        audioCtx = new AC();
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      freqs.forEach((f, idx) => {
+        const now = audioCtx.currentTime + idx * 0.14;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(f, now);
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.exponentialRampToValueAtTime(0.0008, now + 0.25);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.26);
+      });
+    } catch (e) {}
+  }
+
+  function getNextActiveAlarm() {
+    const active = uiState.alarms.find(a => a.enabled);
+    return active || null;
+  }
+
+  const MONTHS = ['JAN', 'FEB', 'MRT', 'APR', 'MEI', 'JUN', 'JUL', 'AUG', 'SEP', 'OKT', 'NOV', 'DEC'];
+  function drawIcon(g, type, x, y, s, active = false) {
+    g.save();
+    g.translate(x, y);
+    g.strokeStyle = active ? '#f6c88a' : '#ddd6cb';
+    g.fillStyle = active ? '#f6c88a' : '#ddd6cb';
+    g.lineWidth = 3.2;
+    g.lineCap = 'round';
+    g.lineJoin = 'round';
+    const r = s * 0.36;
+    if (type === 'alarm') {
+      g.beginPath(); g.arc(0, 3, r, 0, Math.PI * 2); g.stroke();
+      g.beginPath(); g.moveTo(0, 3); g.lineTo(0, -r * 0.5); g.moveTo(0, 3); g.lineTo(r * 0.45, 3 + r * 0.3); g.stroke();
+      g.beginPath(); g.arc(-r * 0.85, -r * 0.8, r * 0.38, Math.PI * 1.05, Math.PI * 1.75); g.stroke();
+      g.beginPath(); g.arc(r * 0.85, -r * 0.8, r * 0.38, Math.PI * 1.25, Math.PI * 1.95); g.stroke();
+    } else if (type === 'sun' || type === 'bright') {
+      const cr = type === 'sun' ? r * 0.42 : r * 0.36;
+      g.beginPath(); g.arc(0, 0, cr, 0, Math.PI * 2); g.stroke();
+      if (type === 'bright') {
+        g.beginPath(); g.arc(0, 0, cr, -Math.PI / 2, Math.PI / 2); g.fill();
+      }
+      for (let i = 0; i < 8; i++) {
+        const a = i * Math.PI / 4;
+        g.beginPath();
+        g.moveTo(Math.cos(a) * cr * 1.6, Math.sin(a) * cr * 1.6);
+        g.lineTo(Math.cos(a) * cr * 2.2, Math.sin(a) * cr * 2.2);
+        g.stroke();
+      }
+    } else if (type === 'note') {
+      g.beginPath(); g.ellipse(-r * 0.55, r * 0.6, r * 0.28, r * 0.22, -0.4, 0, Math.PI * 2); g.stroke();
+      g.beginPath(); g.ellipse(r * 0.55, r * 0.4, r * 0.28, r * 0.22, -0.4, 0, Math.PI * 2); g.stroke();
+      g.beginPath(); g.moveTo(-r * 0.3, r * 0.55); g.lineTo(-r * 0.3, -r * 0.7); g.lineTo(r * 0.8, -r * 0.9); g.lineTo(r * 0.8, r * 0.35); g.stroke();
+    } else if (type === 'cal') {
+      g.strokeRect(-r, -r * 0.8, r * 2, r * 1.8);
+      g.beginPath(); g.moveTo(-r, -r * 0.35); g.lineTo(r, -r * 0.35);
+      g.moveTo(-r * 0.5, -r * 1.05); g.lineTo(-r * 0.5, -r * 0.6);
+      g.moveTo(r * 0.5, -r * 1.05); g.lineTo(r * 0.5, -r * 0.6); g.stroke();
+      for (let i = 0; i < 3; i++) for (let j = 0; j < 2; j++) g.fillRect(-r * 0.62 + i * r * 0.55, r * 0.05 + j * r * 0.45, 5, 5);
+    } else if (type === 'moon') {
+      g.beginPath(); g.arc(0, 0, r * 0.8, 0, Math.PI * 2); g.fill();
+      g.fillStyle = '#0b0a09';
+      g.beginPath(); g.arc(r * 0.42, -r * 0.3, r * 0.72, 0, Math.PI * 2); g.fill();
+    } else if (type === 'lotus') {
+      g.beginPath(); g.ellipse(0, 0, r * 0.32, r * 0.75, 0, 0, Math.PI * 2); g.stroke();
+      g.beginPath(); g.ellipse(-r * 0.5, r * 0.15, r * 0.25, r * 0.6, -0.7, 0, Math.PI * 2); g.stroke();
+      g.beginPath(); g.ellipse(r * 0.5, r * 0.15, r * 0.25, r * 0.6, 0.7, 0, Math.PI * 2); g.stroke();
+    } else if (type === 'gear') {
+      g.beginPath(); g.arc(0, 0, r * 0.62, 0, Math.PI * 2); g.stroke();
+      g.beginPath(); g.arc(0, 0, r * 0.25, 0, Math.PI * 2); g.stroke();
+      for (let i = 0; i < 8; i++) {
+        const a = i * Math.PI / 4;
+        g.beginPath();
+        g.moveTo(Math.cos(a) * r * 0.62, Math.sin(a) * r * 0.62);
+        g.lineTo(Math.cos(a) * r * 0.95, Math.sin(a) * r * 0.95);
+        g.stroke();
+      }
+    }
+    g.restore();
+  }
+
+  // Helper voor Apple-stijl iOS groene/grijze tuimelschakelaar
+  function drawIOSToggle(g, x, y, enabled) {
+    const w = 86, h = 46, r = 23;
+    ctxRR(g, x, y, w, h, r);
+    g.fillStyle = enabled ? '#34c759' : '#3a3836';
+    g.fill();
+
+    // Subtiele binnenrand
+    g.strokeStyle = enabled ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.08)';
+    g.lineWidth = 1.5;
+    g.stroke();
+
+    // Witte knop
+    const knobX = enabled ? x + w - r : x + r;
+    const knobY = y + r;
+    g.beginPath();
+    g.arc(knobX, knobY, r - 4, 0, Math.PI * 2);
+    g.fillStyle = '#ffffff';
+    g.shadowColor = 'rgba(0,0,0,0.35)';
+    g.shadowBlur = 6;
+    g.shadowOffsetY = 2;
+    g.fill();
+    g.shadowColor = 'transparent';
+    g.shadowBlur = 0;
+    g.shadowOffsetY = 0;
+  }
+
+  // Helper voor terugknop rechtsboven in elk subscherm
+  function drawSubHeader(g, title, subtitle, now) {
+    g.textAlign = 'left';
+    g.textBaseline = 'alphabetic';
+    g.fillStyle = '#f2ece1';
+    g.font = '600 34px "Instrument Sans", system-ui, sans-serif';
+    g.fillText(title, 675, 102);
+
+    if (subtitle) {
+      g.fillStyle = '#978e84';
+      g.font = '400 22px "Instrument Sans", system-ui, sans-serif';
+      g.fillText(subtitle, 675, 134);
+    }
+
+    // Terug naar menu knop rechtsboven
+    const bx = 1165, by = 64, bw = 165, bh = 52;
+    ctxRR(g, bx, by, bw, bh, 26);
+    g.fillStyle = 'rgba(255, 245, 232, 0.08)';
+    g.fill();
+    g.strokeStyle = 'rgba(255, 235, 210, 0.16)';
+    g.lineWidth = 2;
+    g.stroke();
+
+    g.fillStyle = '#f5c787';
+    g.font = '600 22px "Instrument Sans", system-ui, sans-serif';
+    g.textAlign = 'center';
+    g.fillText('← Menu', bx + bw / 2, by + 33);
+    g.textAlign = 'left';
+
+    screenHitboxes.push({
+      x: bx, y: by, w: bw, h: bh,
+      action: () => {
+        uiState.view = 'menu';
+        playRotaryTick();
+        drawScreen(now);
+      }
+    });
+  }
+
+  function formatTimeForScreen(now) {
+    const is24 = uiState.settings[0].value;
+    let h = now.getHours();
+    const m = String(now.getMinutes()).padStart(2, '0');
+    if (is24) return `${h}:${m}`;
+    const suffix = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return `${h}:${m} ${suffix}`;
+  }
+
+  function drawScreen(now) {
+    const w = sc.width, h = sc.height, g = sx;
+    screenHitboxes.length = 0;
+
+    // Diepe OLED achtergrond
+    g.fillStyle = '#090807';
+    g.fillRect(0, 0, w, h);
+
+    const vg = g.createRadialGradient(w * 0.28, h * 0.42, 10, w * 0.28, h * 0.42, w * 0.65);
+    vg.addColorStop(0, uiState.meditationActive ? 'rgba(130, 190, 175, 0.09)' : 'rgba(255, 215, 170, 0.055)');
+    vg.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = vg;
+    g.fillRect(0, 0, w, h);
+
+    // ---------- LINKER VAST PANEEL (Datum, Tijd & Actieve Wekker) ----------
+    g.textAlign = 'left';
+    g.textBaseline = 'alphabetic';
+    g.fillStyle = '#a49b90';
+    g.font = '500 28px "Instrument Sans", system-ui, sans-serif';
+    g.fillText(`${DAYS[now.getDay()]} ${now.getDate()} ${MONTHS[now.getMonth()]}${nightModeActive(now) ? '  ·  Nachtstand' : ''}`, 86, 118);
+
+    const nextAlarm = getNextActiveAlarm();
+    const statusText = uiState.snoozed ? 'SNOOZE 9M' : (nextAlarm ? 'WEKKER AAN' : 'GEEN WEKKER');
+    g.fillStyle = nextAlarm ? 'rgba(52, 199, 89, 0.16)' : 'rgba(255,255,255,0.07)';
+    ctxRR(g, 405, 88, 185, 42, 21);
+    g.fill();
+    g.fillStyle = nextAlarm ? '#4ade80' : '#8e867d';
+    g.font = '600 20px "Instrument Sans", system-ui, sans-serif';
+    g.textAlign = 'center';
+    g.fillText(statusText, 497, 116);
+    g.textAlign = 'left';
+
+    // Grote digitale tijd
+    const timeStr = formatTimeForScreen(now);
+    g.fillStyle = '#f2ece1';
+    g.font = `600 ${timeStr.length > 5 ? 132 : 176}px Archivo, "Helvetica Neue", Arial, sans-serif`;
+    g.fillText(timeStr, 80, 294);
+
+    // Statuskaart linksonder (klikt direct naar Wekkers)
+    ctxRR(g, 80, 336, 510, 128, 22);
+    g.fillStyle = 'rgba(255, 245, 232, 0.045)';
+    g.fill();
+    g.strokeStyle = 'rgba(255, 235, 210, 0.09)';
+    g.lineWidth = 2;
+    g.stroke();
+
+    screenHitboxes.push({
+      x: 80, y: 336, w: 510, h: 128,
+      action: () => {
+        uiState.view = uiState.view === 'alarms' ? 'menu' : 'alarms';
+        playRotaryTick();
+        drawScreen(now);
+      }
+    });
+
+    if (uiState.sleepRunning) {
+      const minsLeft = Math.ceil(uiState.sleepRemainingSec / 60);
+      drawIcon(g, 'moon', 126, 398, 52, true);
+      g.fillStyle = '#ebe4d8';
+      g.font = '600 29px "Instrument Sans", system-ui, sans-serif';
+      g.fillText(`Slaaptimer: nog ${minsLeft} min`, 172, 392);
+      g.fillStyle = '#978e84';
+      g.font = '400 23px "Instrument Sans", system-ui, sans-serif';
+      g.fillText('Licht dimt geleidelijk uit', 172, 430);
+    } else if (nextAlarm) {
+      drawIcon(g, 'alarm', 126, 398, 52, true);
+      g.fillStyle = '#ebe4d8';
+      g.font = '600 30px "Instrument Sans", system-ui, sans-serif';
+      g.fillText(`Volgende: ${nextAlarm.time}`, 172, 392);
+      g.fillStyle = '#978e84';
+      g.font = '400 23px "Instrument Sans", system-ui, sans-serif';
+      g.fillText(`${nextAlarm.label} · ${uiState.soundPreset}`, 172, 430);
+    } else {
+      drawIcon(g, 'alarm', 126, 398, 52, false);
+      g.fillStyle = '#b8afa4';
+      g.font = '600 29px "Instrument Sans", system-ui, sans-serif';
+      g.fillText('Alle wekkers staan uit', 172, 392);
+      g.fillStyle = '#827a71';
+      g.font = '400 23px "Instrument Sans", system-ui, sans-serif';
+      g.fillText('Tik hier om een wekker te kiezen', 172, 430);
+    }
+
+    // Verticale scheidingslijn
+    g.strokeStyle = 'rgba(255,245,230,0.09)';
+    g.lineWidth = 2;
+    g.beginPath();
+    g.moveTo(640, 68);
+    g.lineTo(640, h - 68);
+    g.stroke();
+
+    // ---------- RECHTER DYNAMISCH PANEEL ----------
+    if (uiState.view === 'menu') {
+      const items = [
+        ['alarm', 'Wekkers', 'alarms'],
+        ['sun', 'Wekkerlicht', 'light'],
+        ['note', 'Geluid', 'sound'],
+        ['bright', 'Helderheid', 'brightness'],
+        ['cal', 'Schema', 'schedule'],
+        ['moon', 'Slaaptimer', 'sleep'],
+        ['lotus', 'Meditatie', 'meditation'],
+        ['gear', 'Instellingen', 'settings']
+      ];
+
+      const gx = 682, gy = 62, tw = 162, th = 198;
+      items.forEach(([type, label, viewKey], i) => {
+        const col = i % 4;
+        const row = Math.floor(i / 4);
+        const cx = gx + col * tw + tw / 2;
+        const cy = gy + row * th;
+        const boxX = cx - 70, boxY = cy + 4, boxW = 140, boxH = 176;
+
+        const hasActiveBadge =
+          (viewKey === 'alarms' && !!nextAlarm) ||
+          (viewKey === 'sleep' && uiState.sleepRunning) ||
+          (viewKey === 'meditation' && uiState.meditationActive);
+
+        g.fillStyle = hasActiveBadge ? 'rgba(235, 184, 116, 0.12)' : 'rgba(255, 255, 255, 0.03)';
+        ctxRR(g, boxX, boxY, boxW, boxH, 20);
+        g.fill();
+        g.strokeStyle = hasActiveBadge ? 'rgba(235, 184, 116, 0.35)' : 'rgba(255, 255, 255, 0.06)';
+        g.lineWidth = 1.5;
+        g.stroke();
+
+        drawIcon(g, type, cx, cy + 68, 64, hasActiveBadge);
+        g.fillStyle = hasActiveBadge ? '#fff2de' : '#d9d2c7';
+        g.font = '500 22px "Instrument Sans", system-ui, sans-serif';
+        g.textAlign = 'center';
+        g.fillText(label, cx, cy + 146);
+        g.textAlign = 'left';
+
+        screenHitboxes.push({
+          x: boxX, y: boxY, w: boxW, h: boxH,
+          action: () => {
+            uiState.view = viewKey;
+            playRotaryTick();
+            drawScreen(now);
+          }
+        });
+      });
+
+    } else if (uiState.view === 'alarms') {
+      // 1. WEKKERS: 07:00, 07:30, 07:45, 08:00 met Apple-stijl groene/grijze schakelaar
+      drawSubHeader(g, 'Wekkers', 'Tik op de schakelaar om aan of uit te zetten', now);
+
+      uiState.alarms.forEach((alarm, idx) => {
+        const ry = 160 + idx * 78;
+        const rx = 675, rw = 655, rh = 66;
+
+        ctxRR(g, rx, ry, rw, rh, 18);
+        g.fillStyle = alarm.enabled ? 'rgba(52, 199, 89, 0.09)' : 'rgba(255, 255, 255, 0.03)';
+        g.fill();
+        g.strokeStyle = alarm.enabled ? 'rgba(52, 199, 89, 0.28)' : 'rgba(255, 255, 255, 0.06)';
+        g.lineWidth = 1.5;
+        g.stroke();
+
+        // Tijd
+        g.fillStyle = alarm.enabled ? '#f5efe6' : '#8c847b';
+        g.font = '600 36px Archivo, sans-serif';
+        g.fillText(alarm.time, rx + 26, ry + 45);
+
+        // Label
+        g.fillStyle = alarm.enabled ? '#b8b0a4' : '#6e6760';
+        g.font = '400 23px "Instrument Sans", sans-serif';
+        g.fillText(alarm.label, rx + 165, ry + 42);
+
+        // iOS Groene / Grijze schakelaar rechts
+        drawIOSToggle(g, rx + rw - 108, ry + 10, alarm.enabled);
+
+        screenHitboxes.push({
+          x: rx, y: ry, w: rw, h: rh,
+          action: () => {
+            alarm.enabled = !alarm.enabled;
+            uiState.snoozed = false;
+            playRotaryTick();
+            showToast(`Wekker ${alarm.time} ${alarm.enabled ? 'aangezet' : 'uitgezet'}`);
+            drawScreen(now);
+          }
+        });
+      });
+
+    } else if (uiState.view === 'light') {
+      // 2. WEKKERLICHT: 0%, 15%, 30%, 50%, 75%, 100%
+      const curPct = Math.round(dawnTarget * 100);
+      drawSubHeader(g, 'Wekkerlicht', `Huidige lichtsterkte: ${curPct}% (2200K warm)`, now);
+
+      const levels = [0, 15, 30, 50, 75, 100];
+      levels.forEach((pct, i) => {
+        const col = i % 3;
+        const row = Math.floor(i / 3);
+        const bx = 675 + col * 224;
+        const by = 172 + row * 142;
+        const bw = 206, bh = 122;
+        const isCurrent = Math.abs(curPct - pct) <= 4;
+
+        ctxRR(g, bx, by, bw, bh, 22);
+        g.fillStyle = isCurrent ? 'rgba(245, 192, 118, 0.22)' : 'rgba(255, 255, 255, 0.035)';
+        g.fill();
+        g.strokeStyle = isCurrent ? '#f5c787' : 'rgba(255, 255, 255, 0.08)';
+        g.lineWidth = isCurrent ? 2.5 : 1.5;
+        g.stroke();
+
+        // Visueel lichtbolletje
+        g.beginPath();
+        g.arc(bx + bw / 2, by + 42, 14, 0, Math.PI * 2);
+        g.fillStyle = pct === 0 ? '#3a3530' : `rgba(255, 198, 115, ${0.25 + (pct / 100) * 0.75})`;
+        g.fill();
+
+        g.fillStyle = isCurrent ? '#fff5e6' : '#dcd4c8';
+        g.font = '600 32px Archivo, sans-serif';
+        g.textAlign = 'center';
+        g.fillText(`${pct}%`, bx + bw / 2, by + 96);
+        g.textAlign = 'left';
+
+        screenHitboxes.push({
+          x: bx, y: by, w: bw, h: bh,
+          action: () => {
+            if (demoActive) stopDemo();
+            setDawnTarget(pct / 100);
+            playRotaryTick();
+            showToast(`Wekkerlicht op ${pct}% gezet`);
+            drawScreen(now);
+          }
+        });
+      });
+
+    } else if (uiState.view === 'sound') {
+      // 3. GELUID: Keuzelijst met wekgeluiden + Aangepast
+      drawSubHeader(g, 'Wekgeluid', 'Tik om te selecteren en voor te luisteren', now);
+
+      uiState.sounds.forEach((snd, idx) => {
+        const ry = 156 + idx * 64;
+        const rx = 675, rw = 655, rh = 55;
+        const selected = uiState.soundPreset === snd.name;
+
+        ctxRR(g, rx, ry, rw, rh, 15);
+        g.fillStyle = selected ? 'rgba(245, 192, 118, 0.16)' : 'rgba(255, 255, 255, 0.03)';
+        g.fill();
+        g.strokeStyle = selected ? 'rgba(245, 192, 118, 0.5)' : 'rgba(255, 255, 255, 0.06)';
+        g.lineWidth = 1.5;
+        g.stroke();
+
+        // Radio indicator
+        g.beginPath();
+        g.arc(rx + 30, ry + rh / 2, 11, 0, Math.PI * 2);
+        g.strokeStyle = selected ? '#f5c787' : '#7a7269';
+        g.lineWidth = 2.5;
+        g.stroke();
+        if (selected) {
+          g.beginPath();
+          g.arc(rx + 30, ry + rh / 2, 5.5, 0, Math.PI * 2);
+          g.fillStyle = '#f5c787';
+          g.fill();
+        }
+
+        g.fillStyle = selected ? '#fff4e4' : '#e0d8cc';
+        g.font = '600 23px "Instrument Sans", sans-serif';
+        g.fillText(snd.name, rx + 58, ry + 34);
+
+        g.fillStyle = '#8e867c';
+        g.font = '400 19px "Instrument Sans", sans-serif';
+        g.textAlign = 'right';
+        g.fillText(snd.desc, rx + rw - 22, ry + 34);
+        g.textAlign = 'left';
+
+        screenHitboxes.push({
+          x: rx, y: ry, w: rw, h: rh,
+          action: () => {
+            uiState.soundPreset = snd.name;
+            playSoundPreview(snd.freq);
+            showToast(`Wekgeluid: ${snd.name}`);
+            drawScreen(now);
+          }
+        });
+      });
+
+    } else if (uiState.view === 'brightness') {
+      // 4. HELDERHEID: Schermhelderheid van het achterste touchscreen omlaag/omhoog
+      const bPct = Math.round(uiState.brightness * 100);
+      drawSubHeader(g, 'Schermhelderheid', `OLED display niveau: ${bPct}%`, now);
+
+      const barX = 765, barY = 240, barW = 475, barH = 54;
+
+      // Min-knop (-)
+      ctxRR(g, 675, barY, 68, barH, 16);
+      g.fillStyle = 'rgba(255,255,255,0.08)';
+      g.fill();
+      g.fillStyle = '#f2ece1';
+      g.font = '600 36px Archivo, sans-serif';
+      g.textAlign = 'center';
+      g.fillText('−', 709, barY + 39);
+
+      // Plus-knop (+)
+      ctxRR(g, 1262, barY, 68, barH, 16);
+      g.fillStyle = 'rgba(255,255,255,0.08)';
+      g.fill();
+      g.fillStyle = '#f2ece1';
+      g.fillText('+', 1296, barY + 39);
+      g.textAlign = 'left';
+
+      // Slider track
+      ctxRR(g, barX, barY, barW, barH, 27);
+      g.fillStyle = '#1e1b18';
+      g.fill();
+      g.strokeStyle = 'rgba(255,255,255,0.12)';
+      g.lineWidth = 2;
+      g.stroke();
+
+      // Gevulde balk
+      const fillW = Math.max(54, barW * uiState.brightness);
+      ctxRR(g, barX, barY, fillW, barH, 27);
+      const bGrad = g.createLinearGradient(barX, 0, barX + barW, 0);
+      bGrad.addColorStop(0, '#a87842');
+      bGrad.addColorStop(1, '#f8cf92');
+      g.fillStyle = bGrad;
+      g.fill();
+
+      // Duimknop
+      g.beginPath();
+      g.arc(barX + fillW - 27, barY + barH / 2, 20, 0, Math.PI * 2);
+      g.fillStyle = '#ffffff';
+      g.fill();
+
+      // Snelle voorkeuzen onder de balk
+      [20, 50, 80, 100].forEach((preset, idx) => {
+        const px = 675 + idx * 168;
+        const py = 345;
+        ctxRR(g, px, py, 150, 58, 16);
+        g.fillStyle = Math.abs(bPct - preset) <= 4 ? 'rgba(245, 192, 118, 0.2)' : 'rgba(255,255,255,0.04)';
+        g.fill();
+        g.fillStyle = '#e6dfd3';
+        g.font = '600 23px "Instrument Sans", sans-serif';
+        g.textAlign = 'center';
+        g.fillText(`${preset}%`, px + 75, py + 37);
+        g.textAlign = 'left';
+
+        screenHitboxes.push({
+          x: px, y: py, w: 150, h: 58,
+          action: () => {
+            uiState.brightness = preset / 100;
+            playRotaryTick();
+            drawScreen(now);
+          }
+        });
+      });
+
+      // Hitboxes voor -, + en balk
+      screenHitboxes.push({
+        x: 675, y: barY, w: 68, h: barH,
+        action: () => {
+          uiState.brightness = Math.max(0.15, uiState.brightness - 0.1);
+          playRotaryTick();
+          drawScreen(now);
+        }
+      });
+      screenHitboxes.push({
+        x: 1262, y: barY, w: 68, h: barH,
+        action: () => {
+          uiState.brightness = Math.min(1.0, uiState.brightness + 0.1);
+          playRotaryTick();
+          drawScreen(now);
+        }
+      });
+      screenHitboxes.push({
+        x: barX, y: barY, w: barW, h: barH,
+        dragType: 'brightness',
+        action: (cx) => {
+          const ratio = Math.max(0.15, Math.min(1.0, (cx - barX) / barW));
+          uiState.brightness = ratio;
+          drawScreen(now);
+        }
+      });
+
+    } else if (uiState.view === 'schedule') {
+      // 5. SCHEMA & ONTWAAKGESCHIEDENIS
+      drawSubHeader(g, 'Weekschema & Historie', 'Geplande wektijd vs. werkelijk ontwaakt', now);
+
+      // Kolomkoppen
+      g.fillStyle = '#8e867c';
+      g.font = '600 20px "Instrument Sans", sans-serif';
+      g.fillText('DAG', 690, 174);
+      g.fillText('GEPLAND', 810, 174);
+      g.fillText('ONTWAAKT', 990, 174);
+      g.fillText('STATUS', 1190, 174);
+
+      uiState.schedule.forEach((row, idx) => {
+        const ry = 188 + idx * 41;
+        ctxRR(g, 675, ry, 655, 35, 10);
+        g.fillStyle = idx % 2 === 0 ? 'rgba(255,255,255,0.035)' : 'rgba(255,255,255,0.015)';
+        g.fill();
+
+        g.fillStyle = '#f5c787';
+        g.font = '600 21px Archivo, sans-serif';
+        g.fillText(row.day, 692, ry + 25);
+
+        g.fillStyle = '#d6cfc4';
+        g.font = '500 21px "Instrument Sans", sans-serif';
+        g.fillText(row.planned, 815, ry + 25);
+
+        g.fillStyle = '#f2ece1';
+        g.font = '600 21px "Instrument Sans", sans-serif';
+        g.fillText(row.actual, 1000, ry + 25);
+
+        g.fillStyle = row.status === 'ok' ? '#4ade80' : '#fbbf24';
+        g.font = '500 19px "Instrument Sans", sans-serif';
+        g.fillText(row.status === 'ok' ? '● Op tijd' : '● 1x Snooze', 1185, ry + 25);
+      });
+
+    } else if (uiState.view === 'sleep') {
+      // 6. SLAAPTIMER MET RONDE SLEEP-BOOG (linksonder = 0 min, rechtsonder = 60 min)
+      drawSubHeader(g, 'Slaaptimer', 'Sleep langs de boog van linksonder (0m) naar rechtsonder (60m)', now);
+
+      const cx = 920, cy = 325, radius = 128;
+      // Boog loopt met de klok mee van linksonder (0.75 * PI = 135°) via boven (1.5 * PI) naar rechtsonder (2.25 * PI = 405°)
+      const startAngle = Math.PI * 0.75;
+      const totalSweep = Math.PI * 1.5;
+      const fraction = uiState.sleepMinutes / 60;
+      const currentAngle = startAngle + totalSweep * fraction;
+
+      // Achtergrond-boog
+      g.beginPath();
+      g.arc(cx, cy, radius, startAngle, startAngle + totalSweep, false);
+      g.strokeStyle = '#26221e';
+      g.lineWidth = 22;
+      g.lineCap = 'round';
+      g.stroke();
+
+      // Actieve gekleurde boog
+      if (fraction > 0.01) {
+        g.beginPath();
+        g.arc(cx, cy, radius, startAngle, currentAngle, false);
+        const arcGrad = g.createLinearGradient(cx - radius, cy, cx + radius, cy);
+        arcGrad.addColorStop(0, '#8b6844');
+        arcGrad.addColorStop(1, '#f7c882');
+        g.strokeStyle = arcGrad;
+        g.lineWidth = 22;
+        g.lineCap = 'round';
+        g.stroke();
+      }
+
+      // Labels linksonder (0m) en rechtsonder (60m)
+      g.fillStyle = '#8e867c';
+      g.font = '500 20px "Instrument Sans", sans-serif';
+      g.textAlign = 'center';
+      g.fillText('0 min', cx - radius * 0.88, cy + radius * 0.96);
+      g.fillText('60 min', cx + radius * 0.88, cy + radius * 0.96);
+
+      // Grote tijd in het midden van de cirkel
+      const displayMins = uiState.sleepRunning ? Math.ceil(uiState.sleepRemainingSec / 60) : uiState.sleepMinutes;
+      g.fillStyle = '#f2ece1';
+      g.font = '600 58px Archivo, sans-serif';
+      g.fillText(`${displayMins}`, cx, cy + 12);
+      g.fillStyle = '#a49b90';
+      g.font = '500 22px "Instrument Sans", sans-serif';
+      g.fillText('minuten', cx, cy + 44);
+      g.textAlign = 'left';
+
+      // Sleep-knopje op de boog
+      const handleX = cx + Math.cos(currentAngle) * radius;
+      const handleY = cy + Math.sin(currentAngle) * radius;
+      g.beginPath();
+      g.arc(handleX, handleY, 19, 0, Math.PI * 2);
+      g.fillStyle = '#ffffff';
+      g.fill();
+      g.lineWidth = 4;
+      g.strokeStyle = '#d99b52';
+      g.stroke();
+
+      // Start / Stop knop rechts naast de cirkel
+      const btnX = 1120, btnY = 275, btnW = 200, btnH = 74;
+      ctxRR(g, btnX, btnY, btnW, btnH, 22);
+      g.fillStyle = uiState.sleepRunning ? 'rgba(239, 68, 68, 0.22)' : 'rgba(52, 199, 89, 0.22)';
+      g.fill();
+      g.strokeStyle = uiState.sleepRunning ? '#f87171' : '#4ade80';
+      g.lineWidth = 2;
+      g.stroke();
+
+      g.fillStyle = uiState.sleepRunning ? '#fca5a5' : '#86efac';
+      g.font = '600 25px "Instrument Sans", sans-serif';
+      g.textAlign = 'center';
+      g.fillText(uiState.sleepRunning ? 'Stop timer' : 'Start timer', btnX + btnW / 2, btnY + 46);
+      g.textAlign = 'left';
+
+      // Hitbox voor slepen op de cirkelboog
+      const updateSleepFromPoint = (px, py) => {
+        let ang = Math.atan2(py - cy, px - cx);
+        if (ang < 0) ang += Math.PI * 2;
+        // Normaliseer t.o.v. startAngle (0.75 * PI)
+        let rel = ang - startAngle;
+        if (rel < 0) rel += Math.PI * 2;
+
+        // Clamp aan de uiteinden (linksonder = 0, rechtsonder = 60)
+        if (rel > totalSweep) {
+          const distToEnd = rel - totalSweep;
+          const distToStart = (Math.PI * 2) - rel;
+          rel = distToEnd < distToStart ? totalSweep : 0;
+        }
+        const mins = Math.round((rel / totalSweep) * 60);
+        if (mins !== uiState.sleepMinutes) {
+          uiState.sleepMinutes = mins;
+          uiState.sleepRemainingSec = mins * 60;
+          playRotaryTick();
+        }
+        drawScreen(now);
+      };
+
+      screenHitboxes.push({
+        x: cx - radius - 35, y: cy - radius - 35, w: (radius + 35) * 2, h: (radius + 35) * 2,
+        dragType: 'sleep',
+        action: updateSleepFromPoint
+      });
+
+      screenHitboxes.push({
+        x: btnX, y: btnY, w: btnW, h: btnH,
+        action: () => {
+          if (uiState.sleepMinutes === 0 && !uiState.sleepRunning) {
+            uiState.sleepMinutes = 20;
+          }
+          uiState.sleepRunning = !uiState.sleepRunning;
+          uiState.sleepRemainingSec = uiState.sleepMinutes * 60;
+          playRotaryTick();
+          showToast(uiState.sleepRunning ? `Slaaptimer gestart (${uiState.sleepMinutes} min)` : 'Slaaptimer gestopt');
+          drawScreen(now);
+        }
+      });
+
+    } else if (uiState.view === 'meditation') {
+      // 7. MEDITATIE: 4 verschillende sessies
+      drawSubHeader(g, 'Meditatie', 'Kies een sessie met ademhalings-lichtritme', now);
+
+      uiState.meditations.forEach((med, idx) => {
+        const ry = 160 + idx * 78;
+        const rx = 675, rw = 655, rh = 66;
+        const isSelected = uiState.meditationIndex === idx;
+        const isPlaying = isSelected && uiState.meditationActive;
+
+        ctxRR(g, rx, ry, rw, rh, 18);
+        g.fillStyle = isPlaying ? 'rgba(94, 234, 212, 0.14)' : (isSelected ? 'rgba(245, 192, 118, 0.12)' : 'rgba(255, 255, 255, 0.03)');
+        g.fill();
+        g.strokeStyle = isPlaying ? '#5eead4' : (isSelected ? 'rgba(245, 192, 118, 0.4)' : 'rgba(255, 255, 255, 0.06)');
+        g.lineWidth = 1.5;
+        g.stroke();
+
+        g.fillStyle = '#f2ece1';
+        g.font = '600 24px "Instrument Sans", sans-serif';
+        g.fillText(med.name, rx + 24, ry + 32);
+
+        g.fillStyle = '#978e84';
+        g.font = '400 19px "Instrument Sans", sans-serif';
+        g.fillText(`${med.duration} · ${med.breath}`, rx + 24, ry + 56);
+
+        // Start / Pauze badge rechts
+        ctxRR(g, rx + rw - 132, ry + 13, 112, 40, 20);
+        g.fillStyle = isPlaying ? '#2dd4bf' : 'rgba(255,255,255,0.1)';
+        g.fill();
+        g.fillStyle = isPlaying ? '#082f2c' : '#f2ece1';
+        g.font = '600 19px "Instrument Sans", sans-serif';
+        g.textAlign = 'center';
+        g.fillText(isPlaying ? '■ Stop' : '▶ Start', rx + rw - 76, ry + 39);
+        g.textAlign = 'left';
+
+        screenHitboxes.push({
+          x: rx, y: ry, w: rw, h: rh,
+          action: () => {
+            if (uiState.meditationIndex === idx) {
+              uiState.meditationActive = !uiState.meditationActive;
+            } else {
+              uiState.meditationIndex = idx;
+              uiState.meditationActive = true;
+            }
+            playRotaryTick();
+            showToast(uiState.meditationActive ? `Meditatie: ${med.name}` : 'Meditatie gepauzeerd');
+            drawScreen(now);
+          }
+        });
+      });
+
+    } else if (uiState.view === 'settings') {
+      // 8. INSTELLINGEN: Aanpasbare voorkeuren met schakelaars
+      drawSubHeader(g, 'Instellingen', 'Systeem- en hardwarevoorkeuren', now);
+
+      uiState.settings.forEach((st, idx) => {
+        const ry = 160 + idx * 78;
+        const rx = 675, rw = 655, rh = 66;
+
+        ctxRR(g, rx, ry, rw, rh, 18);
+        g.fillStyle = 'rgba(255, 255, 255, 0.035)';
+        g.fill();
+        g.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+        g.lineWidth = 1.5;
+        g.stroke();
+
+        g.fillStyle = '#ebe4d8';
+        g.font = '500 25px "Instrument Sans", sans-serif';
+        g.fillText(st.label, rx + 26, ry + 42);
+
+        drawIOSToggle(g, rx + rw - 108, ry + 10, st.value);
+
+        screenHitboxes.push({
+          x: rx, y: ry, w: rw, h: rh,
+          action: () => {
+            st.value = !st.value;
+            playRotaryTick();
+            showToast(`${st.label}: ${st.value ? 'Aan' : 'Uit'}`);
+            drawScreen(now);
+          }
+        });
+      });
+    }
+
+    // Pas echte OLED schermhelderheid toe via een donkere overlay
+    // ("Auto-nachtstand scherm" dimt het scherm 's nachts extra, bovenop de handmatige stand)
+    const isNight = nightModeActive(now);
+    const effectiveBrightness = isNight ? Math.min(uiState.brightness, 0.3) : uiState.brightness;
+    if (effectiveBrightness < 0.99) {
+      g.fillStyle = `rgba(0, 0, 0, ${(1 - effectiveBrightness) * 0.78})`;
+      g.fillRect(0, 0, w, h);
+    }
+
+    screenTex.needsUpdate = true;
+  }
+
+  // ---------- Bovenkant: Dawn Light Strip & Geribbelde Draaiknop (Rotary Encoder) ----------
+  // Lichtstrip behuizing (messing randje)
+  const stripBezel = new THREE.Mesh(
+    new THREE.BoxGeometry(W - 0.72, 0.016, 0.052),
+    brassMat
+  );
+  stripBezel.position.set(-0.10, H / 2 + 0.004, D / 2 - 0.14);
+  clock.add(stripBezel);
+
+  const stripMat = new THREE.MeshBasicMaterial({ color: 0x3a2a1c, toneMapped: false });
+  const strip = new THREE.Mesh(new THREE.BoxGeometry(W - 0.76, 0.018, 0.036), stripMat);
+  strip.position.set(-0.10, H / 2 + 0.006, D / 2 - 0.14);
+  clock.add(strip);
+
+  // Zachte lichtgloed op de bovenkant van het hout
+  const glowC = document.createElement('canvas');
+  glowC.width = 256;
+  glowC.height = 64;
+  {
+    const g = glowC.getContext('2d');
+    const gr = g.createRadialGradient(128, 32, 2, 128, 32, 128);
+    gr.addColorStop(0, 'rgba(255, 200, 130, 1)');
+    gr.addColorStop(0.55, 'rgba(255, 165, 85, 0.45)');
+    gr.addColorStop(1, 'rgba(255, 190, 120, 0)');
+    g.fillStyle = gr;
+    g.fillRect(0, 0, 256, 64);
+  }
+  const glowMat = new THREE.MeshBasicMaterial({
+    map: new THREE.CanvasTexture(glowC),
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    toneMapped: false,
+    opacity: 0
+  });
+  const glow = new THREE.Mesh(new THREE.PlaneGeometry(W - 0.15, 0.42), glowMat);
+  glow.rotation.x = -Math.PI / 2;
+  glow.position.set(-0.10, H / 2 + 0.012, D / 2 - 0.14);
+  clock.add(glow);
+
+  // Draaiknop (Rotary Encoder) met geribbelde kartels (knurling), messing kraag en LED-ring
+  const knobAssembly = new THREE.Group();
+  knobAssembly.position.set(W / 2 - 0.31, H / 2, -0.06);
+  clock.add(knobAssembly);
+
+  // Messing verzonken kraag
+  const knobCollar = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.118, 0.124, 0.014, 48),
+    brassMat
+  );
+  knobCollar.position.y = 0.007;
+  knobCollar.receiveShadow = true;
+  knobAssembly.add(knobCollar);
+
+  // Subtiele LED-ring rond de draaiknop
+  const ledRingMat = new THREE.MeshBasicMaterial({ color: 0xffc680, toneMapped: false });
+  const ledRing = new THREE.Mesh(
+    new THREE.RingGeometry(0.102, 0.112, 48),
+    ledRingMat
+  );
+  ledRing.rotation.x = -Math.PI / 2;
+  ledRing.position.y = 0.015;
+  knobAssembly.add(ledRing);
+
+  // Draaiende knop zelf (met kartels)
+  const knobRotator = new THREE.Group();
+  knobRotator.position.y = 0.014;
+  knobAssembly.add(knobRotator);
+
+  const knobCore = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.094, 0.098, 0.056, 48),
+    gunmetalMat
+  );
+  knobCore.position.y = 0.028;
+  knobCore.castShadow = true;
+  knobCore.receiveShadow = true;
+  knobCore.name = 'rotary_knob';
+  knobRotator.add(knobCore);
+
+  // Messing boveninleg op de knop
+  const knobCap = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.084, 0.084, 0.004, 48),
+    new THREE.MeshStandardMaterial({ color: 0x38312c, metalness: 0.75, roughness: 0.28 })
+  );
+  knobCap.position.y = 0.057;
+  knobCap.name = 'rotary_knob';
+  knobRotator.add(knobCap);
+
+  // Positie-indicator streepje op de draaiknop
+  const knobIndicator = new THREE.Mesh(
+    new THREE.BoxGeometry(0.008, 0.006, 0.032),
+    brassMat
+  );
+  knobIndicator.position.set(0, 0.059, 0.055);
+  knobRotator.add(knobIndicator);
+
+  // 48 fijne kartel-ribjes rondom de draaiknop
+  const ribGeo = new THREE.BoxGeometry(0.005, 0.046, 0.008);
+  const ribCount = 44;
+  for (let i = 0; i < ribCount; i++) {
+    const a = (i / ribCount) * Math.PI * 2;
+    const rib = new THREE.Mesh(ribGeo, gunmetalMat);
+    rib.position.set(Math.cos(a) * 0.096, 0.028, Math.sin(a) * 0.096);
+    rib.rotation.y = -a;
+    rib.name = 'rotary_knob';
+    knobRotator.add(rib);
+  }
+
+  // ---------- Realistische Nachtkastje-ondergrond & Contactschaduw ----------
+  function makeNightstandSurface() {
+    const c = document.createElement('canvas');
+    c.width = 1024;
+    c.height = 1024;
+    const g = c.getContext('2d');
+
+    // Donkere, warme leisteen / geborsteld travertin ondergrond met radiale vignettering
+    const grad = g.createRadialGradient(512, 512, 40, 512, 512, 500);
+    grad.addColorStop(0, '#2a231e');
+    grad.addColorStop(0.55, '#1d1815');
+    grad.addColorStop(1, '#120f0d');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 1024, 1024);
+
+    // Subtiele steen/hout-microtextuur
+    for (let i = 0; i < 14000; i++) {
+      const v = Math.random();
+      g.fillStyle = v > 0.5 ? `rgba(255,245,230,${Math.random() * 0.018})` : `rgba(0,0,0,${Math.random() * 0.04})`;
+      g.fillRect(Math.random() * 1024, Math.random() * 1024, 2, 2);
+    }
+
+    const t = new THREE.CanvasTexture(c);
+    t.encoding = THREE.sRGBEncoding;
+    t.anisotropy = aniso;
+    return t;
+  }
+
+  const tablePlane = new THREE.Mesh(
+    new THREE.CircleGeometry(14, 64),
+    new THREE.MeshStandardMaterial({
+      map: makeNightstandSurface(),
+      roughness: 0.78,
+      metalness: 0.05
+    })
+  );
+  tablePlane.rotation.x = -Math.PI / 2;
+  tablePlane.position.y = -H / 2 - 0.001;
+  tablePlane.receiveShadow = true;
+  scene.add(tablePlane);
+
+  // Zachte ambient occlusion contactschaduw direct onder de wekker
+  const aoCanvas = document.createElement('canvas');
+  aoCanvas.width = 512;
+  aoCanvas.height = 256;
+  {
+    const g = aoCanvas.getContext('2d');
+    const gr = g.createRadialGradient(256, 128, 30, 256, 128, 235);
+    gr.addColorStop(0, 'rgba(0, 0, 0, 0.85)');
+    gr.addColorStop(0.55, 'rgba(0, 0, 0, 0.42)');
+    gr.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    g.fillStyle = gr;
+    g.fillRect(0, 0, 512, 256);
+  }
+  const aoShadow = new THREE.Mesh(
+    new THREE.PlaneGeometry(W + 0.55, D + 0.55),
+    new THREE.MeshBasicMaterial({
+      map: new THREE.CanvasTexture(aoCanvas),
+      transparent: true,
+      depthWrite: false,
+      opacity: 0.9
+    })
+  );
+  aoShadow.rotation.x = -Math.PI / 2;
+  aoShadow.position.y = 0.001;
+  clock.add(aoShadow);
+
+  // ---------- Studio Belichting ----------
+  const hemiLight = new THREE.HemisphereLight(0xfff0dc, 0x241811, 0.85);
+  scene.add(hemiLight);
+
+  const keyLight = new THREE.DirectionalLight(0xffe7cc, 2.4);
+  keyLight.position.set(-3.2, 5.2, 4.8);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.set(2048, 2048);
+  Object.assign(keyLight.shadow.camera, {
+    left: -3.2,
+    right: 3.2,
+    top: 3.2,
+    bottom: -3.2,
+    near: 1,
+    far: 16
+  });
+  keyLight.shadow.bias = -0.0004;
+  keyLight.shadow.normalBias = 0.012;
+  scene.add(keyLight);
+
+  const rimLight = new THREE.DirectionalLight(0xa8beff, 0.75);
+  rimLight.position.set(4.2, 2.6, -4.5);
+  scene.add(rimLight);
+
+  const stripLight = new THREE.PointLight(0xffb469, 0, 4.2, 1.8);
+  stripLight.position.set(-0.1, H / 2 + 0.35, D / 2 - 0.1);
+  clock.add(stripLight);
+
+  // ---------- Camera, Orbit, Zoom & Raycasting Interactie ----------
+  const FRONT_ANGLE = -0.32;
+  const BACK_ANGLE = Math.PI + 0.32;
+
+  let rotY = FRONT_ANGLE;
+  let rotTarget = FRONT_ANGLE;
+  let elev = 0.22;
+  let elevTarget = 0.22;
+  let zoomFactor = 1.0;
+  let zoomTarget = 1.0;
+
+  let dragging = false;
+  let pointerMoved = false;
+  let downX = 0, downY = 0;
+  let lx = 0, ly = 0;
+  let knobPressAnim = 0;
+  let knobRotation = 0;
+
+  function nearestAngle(target) {
+    return target + 2 * Math.PI * Math.round((rotY - target) / (2 * Math.PI));
+  }
+
+  const raycaster = new THREE.Raycaster();
+  const pointerNDC = new THREE.Vector2();
+
+  function updatePointerNDC(e) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    pointerNDC.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    pointerNDC.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  }
+
+  function handleCanvasClick(e) {
+    updatePointerNDC(e);
+    raycaster.setFromCamera(pointerNDC, camera);
+
+    // 1. Check draaiknop klik (Snooze / Dim)
+    const knobHits = raycaster.intersectObjects(knobRotator.children, true);
+    if (knobHits.length > 0) {
+      knobPressAnim = 1.0;
+      knobRotation += Math.PI / 6;
+      playRotaryTick();
+      if (demoActive) {
+        stopDemo();
+        if (isSettingOn('snooze9')) {
+          uiState.snoozed = true;
+          setDawnTarget(0.25);
+          showToast('Snooze geactiveerd (9 min) · Licht gedimd');
+        } else {
+          uiState.snoozed = false;
+          const active = getNextActiveAlarm();
+          if (active) active.enabled = false;
+          setDawnTarget(0);
+          showToast('Wekker uitgezet (snooze staat uit)');
+        }
+      } else {
+        const nextLevel = dawn > 0.7 ? 0.0 : (dawn > 0.2 ? 1.0 : 0.45);
+        setDawnTarget(nextLevel);
+        showToast(`Draaiknop: Wekkerlicht ${Math.round(nextLevel * 100)}%`);
+      }
+      drawScreen(getSimulatedNow());
+      return;
+    }
+
+    // 2. Check achterkant touchscreen klik
+    const screenHits = raycaster.intersectObject(screenMesh);
+    if (screenHits.length > 0 && screenHits[0].uv) {
+      const uv = screenHits[0].uv;
+      const cx = uv.x * sc.width;
+      const cy = (1 - uv.y) * sc.height;
+      for (const box of screenHitboxes) {
+        if (cx >= box.x && cx <= box.x + box.w && cy >= box.y && cy <= box.y + box.h) {
+          box.action(cx, cy);
+          return;
+        }
+      }
+    }
+  }
+
+  const cv = renderer.domElement;
+  cv.addEventListener('pointerdown', e => {
+    downX = lx = e.clientX;
+    downY = ly = e.clientY;
+    pointerMoved = false;
+    activeSliderDrag = null;
+
+    // Controleer eerst of we op een sleepbare regelaar op het touchscreen drukken (Slaaptimer boog of Helderheid)
+    updatePointerNDC(e);
+    raycaster.setFromCamera(pointerNDC, camera);
+    const screenHits = raycaster.intersectObject(screenMesh);
+    if (screenHits.length > 0 && screenHits[0].uv) {
+      const cx = screenHits[0].uv.x * sc.width;
+      const cy = (1 - screenHits[0].uv.y) * sc.height;
+      for (const box of screenHitboxes) {
+        if (box.dragType && cx >= box.x && cx <= box.x + box.w && cy >= box.y && cy <= box.y + box.h) {
+          activeSliderDrag = box;
+          box.action(cx, cy);
+          cv.setPointerCapture(e.pointerId);
+          return;
+        }
+      }
+    }
+
+    dragging = true;
+    cv.setPointerCapture(e.pointerId);
+  });
+
+  cv.addEventListener('pointermove', e => {
+    if (activeSliderDrag) {
+      updatePointerNDC(e);
+      raycaster.setFromCamera(pointerNDC, camera);
+      const screenHits = raycaster.intersectObject(screenMesh);
+      if (screenHits.length > 0 && screenHits[0].uv) {
+        const cx = screenHits[0].uv.x * sc.width;
+        const cy = (1 - screenHits[0].uv.y) * sc.height;
+        activeSliderDrag.action(cx, cy);
+      }
+      return;
+    }
+
+    if (dragging) {
+      const dx = e.clientX - lx;
+      const dy = e.clientY - ly;
+      if (Math.hypot(e.clientX - downX, e.clientY - downY) > 5) {
+        pointerMoved = true;
+        clearActiveViewButtons();
+      }
+      rotY += dx * 0.0085;
+      rotTarget = rotY;
+      elev = Math.min(1.05, Math.max(0.03, elev + dy * 0.0045));
+      elevTarget = elev;
+      lx = e.clientX;
+      ly = e.clientY;
+    } else {
+      // Hover cursor feedback voor interactieve 3D-onderdelen
+      updatePointerNDC(e);
+      raycaster.setFromCamera(pointerNDC, camera);
+      const hits = raycaster.intersectObjects([screenMesh, ...knobRotator.children], true);
+      stage.classList.toggle('pointer-hover', hits.length > 0);
+    }
+  });
+
+  const endPointer = e => {
+    if (activeSliderDrag) {
+      activeSliderDrag = null;
+      dragging = false;
+      return;
+    }
+    if (dragging && !pointerMoved) {
+      handleCanvasClick(e);
+    }
+    dragging = false;
+  };
+  cv.addEventListener('pointerup', endPointer);
+  cv.addEventListener('pointercancel', () => { dragging = false; activeSliderDrag = null; });
+
+  // Scrollwiel om soepel in/uit te zoomen (of draaiknop te draaien met Shift)
+  cv.addEventListener('wheel', e => {
+    e.preventDefault();
+    if (e.shiftKey) {
+      const delta = e.deltaY > 0 ? -0.08 : 0.08;
+      knobRotation += delta * 2.5;
+      playRotaryTick();
+      setDawnTarget(Math.max(0, Math.min(1, dawn + delta)));
+    } else {
+      zoomTarget = Math.max(0.72, Math.min(1.38, zoomTarget + e.deltaY * 0.0008));
+    }
+  }, { passive: false });
+
+  // ---------- Wekkerlicht (Dawn Simulator) & Demo-status ----------
+  const dawnSlider = document.getElementById('dawn-slider');
+  const dawnPct = document.getElementById('dawn-pct');
+  const headerLed = document.getElementById('header-led');
+
+  let dawn = 0.35;
+  let dawnTarget = 0.35;
+  let demoActive = false;
+  let demoInterval = null;
+  let demoOffsetMinutes = 0;
+
+  function setDawnTarget(val, updateSlider = true) {
+    dawnTarget = Math.max(0, Math.min(1, val));
+    if (updateSlider) {
+      dawnSlider.value = Math.round(dawnTarget * 100);
+      dawnPct.textContent = `${Math.round(dawnTarget * 100)}%`;
+    }
+  }
+
+  dawnSlider.addEventListener('input', (e) => {
+    if (demoActive) stopDemo();
+    const v = parseInt(e.target.value, 10) / 100;
+    dawn = dawnTarget = v;
+    dawnPct.textContent = `${e.target.value}%`;
+  });
+
+  document.getElementById('btn-dawn-toggle').addEventListener('click', () => {
+    if (demoActive) stopDemo();
+    const next = dawnTarget < 0.5 ? 1.0 : 0.0;
+    setDawnTarget(next);
+    showToast(next > 0.5 ? 'Wekkerlicht op 100% ochtendgloed' : 'Wekkerlicht gedoofd (Nachtmodus)');
+  });
+
+  // ---------- UI Knoppen & Camera Standpunten ----------
+  const btnFront = document.getElementById('btn-front');
+  const btnBack = document.getElementById('btn-back');
+  const btnTop = document.getElementById('btn-top');
+
+  function clearActiveViewButtons() {
+    [btnFront, btnBack, btnTop].forEach(b => b.classList.remove('active'));
+  }
+
+  btnFront.addEventListener('click', () => {
+    clearActiveViewButtons();
+    btnFront.classList.add('active');
+    rotTarget = nearestAngle(FRONT_ANGLE);
+    elevTarget = 0.20;
+    zoomTarget = 1.0;
+  });
+
+  btnBack.addEventListener('click', () => {
+    clearActiveViewButtons();
+    btnBack.classList.add('active');
+    rotTarget = nearestAngle(BACK_ANGLE);
+    elevTarget = 0.16;
+    zoomTarget = 0.96;
+    showToast('Tip: Klik op de tegels van het touchscreen');
+  });
+
+  btnTop.addEventListener('click', () => {
+    clearActiveViewButtons();
+    btnTop.classList.add('active');
+    rotTarget = nearestAngle(-0.15);
+    elevTarget = 0.88;
+    zoomTarget = 0.98;
+  });
+
+  // Tijd-simulatie knoppen
+  document.getElementById('btn-flip-min').addEventListener('click', () => {
+    demoOffsetMinutes += 1;
+    knobRotation += 0.35;
+    tick(true);
+    showToast('Tijd +1 minuut');
+  });
+
+  document.getElementById('btn-flip-hour').addEventListener('click', () => {
+    demoOffsetMinutes += 60;
+    knobRotation += 0.85;
+    tick(true);
+    showToast('Tijd +1 uur');
+  });
+
+  const btnDemo = document.getElementById('btn-demo');
+  const demoLabel = document.getElementById('demo-label');
+
+  function startDemo() {
+    demoActive = true;
+    uiState.snoozed = false;
+    btnDemo.classList.add('active');
+    demoLabel.textContent = 'Stop demo';
+    setDawnTarget(0.05);
+    dawn = 0.05;
+    showToast('Zonsopgang & flip-klok demo gestart');
+
+    // Laat de zonsopgang oplopen en de klok elke 1.2s verspringen
+    setDawnTarget(1.0);
+    demoInterval = setInterval(() => {
+      demoOffsetMinutes += 1;
+      knobRotation += 0.25;
+      tick(true);
+    }, 1150);
+  }
+
+  function stopDemo() {
+    demoActive = false;
+    btnDemo.classList.remove('active');
+    demoLabel.textContent = 'Wekker-demo';
+    clearInterval(demoInterval);
+    demoInterval = null;
+  }
+
+  btnDemo.addEventListener('click', () => {
+    if (demoActive) {
+      stopDemo();
+      showToast('Wekker-demo gestopt');
+    } else {
+      startDemo();
+    }
+  });
+
+  // ---------- Klok & Maanfase Berekening ----------
+  function moonPhase(d) {
+    const days = (d.getTime() - Date.UTC(2000, 0, 6, 18, 14)) / 86400000;
+    return ((days / 29.530588853) % 1 + 1) % 1;
+  }
+
+  function getSimulatedNow() {
+    return new Date(Date.now() + demoOffsetMinutes * 60000);
+  }
+
+  let lastScreenKey = '';
+  function tick(forceScreen = false) {
+    const now = getSimulatedNow();
+    mods[0].set(String(now.getHours()));
+    mods[1].set(String(now.getMinutes()).padStart(2, '0'));
+    mods[2].set(DAYS[now.getDay()] + '|' + (Math.round(moonPhase(now) * 28) / 28).toFixed(3));
+
+    const sk = `${now.getHours()}:${now.getMinutes()}`;
+    if (sk !== lastScreenKey || forceScreen) {
+      lastScreenKey = sk;
+      drawScreen(now);
+    }
+  }
+
+  // ---------- Resize Handling ----------
+  function resize() {
+    const w = window.innerWidth || stage.clientWidth || 800;
+    const h = window.innerHeight || stage.clientHeight || 600;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize);
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(resize).observe(stage);
+  }
+  resize();
+
+  // ---------- Animatielus ----------
+  const stripColorOff = new THREE.Color(0x3a2a1c);
+  const stripColorOn = new THREE.Color(0xffe0b2);
+  const ledOff = new THREE.Color(0x4a3828);
+  const ledOn = new THREE.Color(0xffcf87);
+
+  let lastTime = performance.now();
+
+  function frame(nowTime) {
+    const dt = Math.min(0.05, (nowTime - lastTime) / 1000);
+    lastTime = nowTime;
+
+    // Camera & draai-interpolatie
+    if (!dragging) {
+      const lerpSpeed = reduceMotion ? 60 : 4.5;
+      rotY += (rotTarget - rotY) * Math.min(1, dt * lerpSpeed);
+      elev += (elevTarget - elev) * Math.min(1, dt * lerpSpeed);
+    }
+    zoomFactor += (zoomTarget - zoomFactor) * Math.min(1, dt * 6);
+    clock.rotation.y = rotY;
+
+    // Draaiknop animatie (indrukken + draaien)
+    knobRotator.rotation.y += (knobRotation - knobRotator.rotation.y) * Math.min(1, dt * 14);
+    if (knobPressAnim > 0) {
+      knobPressAnim = Math.max(0, knobPressAnim - dt * 5.5);
+      knobRotator.position.y = 0.014 - Math.sin(knobPressAnim * Math.PI) * 0.008;
+    }
+
+    // Responsieve camera-afstand zodat de wekker altijd prominent gecentreerd staat
+    const vfov = camera.fov * Math.PI / 180;
+    const hfov = 2 * Math.atan(Math.tan(vfov / 2) * (camera.aspect || 1.33));
+    const baseDist = Math.max(2.35 / Math.tan(hfov / 2), 1.45 / Math.tan(vfov / 2), 4.8);
+    const dist = baseDist * zoomFactor;
+
+    camera.position.set(0, Math.sin(elev) * dist, Math.cos(elev) * dist);
+    camera.lookAt(0, 0, 0);
+
+    // Wekkerlicht (Dawn Simulator) interpolatie & Slaaptimer aftellen
+    if (uiState.sleepRunning) {
+      uiState.sleepRemainingSec = Math.max(0, uiState.sleepRemainingSec - dt);
+      const ratio = uiState.sleepRemainingSec / Math.max(1, uiState.sleepMinutes * 60);
+      setDawnTarget(ratio * 0.6);
+      if (uiState.sleepRemainingSec <= 0) {
+        uiState.sleepRunning = false;
+        setDawnTarget(0);
+        showToast('Slaaptimer afgelopen · Welterusten');
+        drawScreen(getSimulatedNow());
+      }
+    }
+
+    const dawnSpeed = demoActive ? 0.16 : 3.2;
+    dawn += (dawnTarget - dawn) * Math.min(1, dt * dawnSpeed);
+    if (!demoActive && Math.abs(dawnTarget - dawn) > 0.005) {
+      dawnSlider.value = Math.round(dawn * 100);
+      dawnPct.textContent = `${Math.round(dawn * 100)}%`;
+    }
+
+    // Optionele ademhalingspuls tijdens meditatie
+    let pulse = 0;
+    if (uiState.meditationActive) {
+      pulse = Math.sin(nowTime * 0.0012) * 0.14;
+    }
+    const effectiveDawn = Math.max(0, Math.min(1, dawn + pulse));
+    const easedDawn = effectiveDawn * effectiveDawn * (3 - 2 * effectiveDawn);
+
+    stripMat.color.copy(stripColorOff).lerp(stripColorOn, Math.min(1, easedDawn * 1.25));
+    ledRingMat.color.copy(ledOff).lerp(ledOn, 0.35 + easedDawn * 0.65);
+    glowMat.opacity = easedDawn * 0.72;
+    stripLight.intensity = easedDawn * 2.8;
+    keyLight.intensity = 2.1 + easedDawn * 0.65;
+    hemiLight.intensity = 0.78 + easedDawn * 0.38;
+
+    stage.style.setProperty('--dawn', easedDawn.toFixed(3));
+    headerLed.style.opacity = (0.35 + easedDawn * 0.65).toFixed(2);
+
+    tick();
+    mods.forEach(m => m.update(dt));
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+
+  // Start direct zonder te wachten op window.load (omdat het script al async draait)
+  tick(true);
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
