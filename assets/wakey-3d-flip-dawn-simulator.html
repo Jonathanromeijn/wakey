@@ -2070,15 +2070,26 @@
   clock.add(stripLight);
 
   // ---------- Camera, orbit, zoom & raycasting interaction ----------
-  const FRONT_ANGLE = 0;
-  const BACK_ANGLE = Math.PI;
+  // On the homepage the design should be central (3/4 product angle, zoomed out a bit).
+  // In the "see how it works" showcase, the camera sits close and dead-on, on the panel itself.
+  const DESIGN_FRONT_ANGLE = -0.32;
+  const DESIGN_BACK_ANGLE = Math.PI + 0.32;
+  const PANEL_FRONT_ANGLE = 0;
+  const PANEL_BACK_ANGLE = Math.PI;
+
+  const FRONT_ANGLE = showcaseMode ? PANEL_FRONT_ANGLE : DESIGN_FRONT_ANGLE;
+  const BACK_ANGLE = showcaseMode ? PANEL_BACK_ANGLE : DESIGN_BACK_ANGLE;
+  const FRONT_ELEV = showcaseMode ? 0.05 : 0.22;
+  const BACK_ELEV = showcaseMode ? 0.05 : 0.16;
+  const FRONT_ZOOM = showcaseMode ? 0.6 : 1.0;
+  const BACK_ZOOM = showcaseMode ? 0.6 : 0.96;
 
   let rotY = FRONT_ANGLE;
   let rotTarget = FRONT_ANGLE;
-  let elev = 0.17;
-  let elevTarget = 0.17;
-  let zoomFactor = 0.68;
-  let zoomTarget = 0.68;
+  let elev = FRONT_ELEV;
+  let elevTarget = FRONT_ELEV;
+  let zoomFactor = FRONT_ZOOM;
+  let zoomTarget = FRONT_ZOOM;
 
   let dragging = false;
   let pointerMoved = false;
@@ -2235,7 +2246,7 @@
       playRotaryTick();
       setDawnTarget(Math.max(0, Math.min(1, dawn + delta)));
     } else {
-      zoomTarget = Math.max(0.58, Math.min(1.38, zoomTarget + e.deltaY * 0.0008));
+      zoomTarget = Math.max(0.4, Math.min(1.38, zoomTarget + e.deltaY * 0.0008));
     }
   }, { passive: false });
 
@@ -2289,16 +2300,16 @@
     clearActiveViewButtons();
     btnFront.classList.add('active');
     rotTarget = nearestAngle(FRONT_ANGLE);
-    elevTarget = 0.17;
-    zoomTarget = 0.68;
+    elevTarget = FRONT_ELEV;
+    zoomTarget = FRONT_ZOOM;
   });
 
   btnBack.addEventListener('click', () => {
     clearActiveViewButtons();
     btnBack.classList.add('active');
     rotTarget = nearestAngle(BACK_ANGLE);
-    elevTarget = 0.17;
-    zoomTarget = 0.68;
+    elevTarget = BACK_ELEV;
+    zoomTarget = BACK_ZOOM;
     showToast('Tip: click the tiles on the touchscreen');
   });
 
