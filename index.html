@@ -76,13 +76,15 @@
   /* hero */
   .wk-hero-top { position: relative; padding-top: clamp(8px, 2vw, 20px); }
   .wk-hero-word { position: relative; z-index: 1; margin: 0; font-family: "Archivo", sans-serif; font-weight: 800; font-stretch: 118%; font-size: clamp(92px, 25vw, 380px); line-height: .82; letter-spacing: -.045em; color: var(--ink); }
-  .wk-hero-visual { position: relative; z-index: 2; width: min(560px, 86vw); aspect-ratio: 16 / 10; margin: 20px auto 0 auto; }
+  .wk-hero-visual { position: relative; z-index: 2; width: min(480px, 82vw); aspect-ratio: 3 / 5; margin: 20px auto 0 auto; border-radius: 18px; overflow: hidden; }
   .wk-hero-visual iframe { width: 100%; height: 100%; border: 0; display: block; }
   @media (min-width: 860px) {
-    .wk-hero-visual { position: absolute; right: clamp(0px, 4vw, 40px); bottom: clamp(-64px, -6vw, -24px); margin: 0; width: min(640px, 44vw); }
+    .wk-hero-visual { position: absolute; right: clamp(0px, 4vw, 40px); bottom: clamp(-64px, -6vw, -24px); margin: 0; width: min(420px, 28vw); }
   }
   .wk-drag-hint { display: block; margin-top: 10px; text-align: center; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); }
   @media (min-width: 860px) { .wk-drag-hint { position: absolute; right: clamp(0px, 4vw, 40px); bottom: clamp(-86px, -8vw, -46px); width: min(640px, 44vw); margin: 0; } }
+  .wk-drag-hint-link { color: var(--ink); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+  .wk-drag-hint-link:hover { color: var(--accent); }
 
   .wk-hero-bottom { position: relative; z-index: 1; padding: clamp(32px, 7vw, 64px) 0 clamp(56px, 8vw, 100px); display: flex; flex-direction: column; gap: 20px; max-width: 560px; }
   .wk-sub { margin: 0; font-size: clamp(16px, 1.3vw, 18px); line-height: 1.55; color: var(--ink-muted); }
@@ -229,9 +231,9 @@
   <section class="wk-hero-top wk-container">
     <h1 class="wk-hero-word wk-rise">wakey</h1>
     <div class="wk-hero-visual wk-rise" style="animation-delay:.1s;">
-      <iframe src="assets/wakey-3d-explode.html" title="Interactive 3D render of the wakey alarm clock, exploding apart and reassembling" referrerpolicy="no-referrer"></iframe>
+      <iframe src="assets/wakey-3d-flip-dawn-simulator.html" title="Interactive 3D render of the wakey alarm clock, with its touchscreen back panel and dawn simulator" referrerpolicy="no-referrer"></iframe>
     </div>
-    <span class="wk-drag-hint">Drag to rotate &middot; tap to rebuild</span>
+    <span class="wk-drag-hint">Drag to rotate &middot; scroll to zoom &middot; <a href="#how" class="wk-drag-hint-link">see how it works &rarr;</a></span>
 
     <div class="wk-hero-bottom wk-rise" style="animation-delay:.18s;">
       <p class="wk-eyebrow">Phone-free alarm clock</p>
