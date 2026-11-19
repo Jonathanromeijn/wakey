@@ -2047,12 +2047,19 @@
   aoCanvas.height = 256;
   {
     const g = aoCanvas.getContext('2d');
-    const gr = g.createRadialGradient(256, 128, 30, 256, 128, 235);
+    // Squash the gradient vertically so it fades to fully transparent before every edge of the
+    // canvas (a plain circular gradient this wide was getting hard-clipped top/bottom, showing
+    // up as a sharp horizontal edge beside the clock instead of fading away).
+    g.save();
+    g.translate(256, 128);
+    g.scale(1, 0.5);
+    const gr = g.createRadialGradient(0, 0, 30, 0, 0, 235);
     gr.addColorStop(0, 'rgba(0, 0, 0, 0.85)');
     gr.addColorStop(0.55, 'rgba(0, 0, 0, 0.42)');
     gr.addColorStop(1, 'rgba(0, 0, 0, 0)');
     g.fillStyle = gr;
-    g.fillRect(0, 0, 512, 256);
+    g.fillRect(-256, -256, 512, 512);
+    g.restore();
   }
   const aoShadow = new THREE.Mesh(
     new THREE.PlaneGeometry(W + 0.55, D + 0.55),
