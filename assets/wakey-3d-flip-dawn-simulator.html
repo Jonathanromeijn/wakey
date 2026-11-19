@@ -24,6 +24,9 @@
     color: #f3ede4;
     user-select: none;
   }
+  html.stage-transparent, body.stage-transparent {
+    background: transparent;
+  }
   #stage {
     position: fixed;
     inset: 0;
@@ -64,6 +67,13 @@
   #stage.showcase-mode,
   #stage.showcase-mode:active {
     cursor: default;
+  }
+  #stage.stage-transparent {
+    background: transparent;
+  }
+  #stage.stage-transparent::before,
+  #stage.stage-transparent::after {
+    display: none;
   }
   #stage canvas {
     position: absolute;
@@ -268,12 +278,23 @@
 (async function () {
   const stage = document.getElementById('stage');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  // Showcase mode (used in the homepage overlay): no free drag-rotate, front/back view only
+  // Showcase mode (used in the "see how it works" overlay): no free drag-rotate, front/back view only.
+  // Outside of it (the homepage embed) the clock floats with no background or UI chrome at all.
   const showcaseMode = new URLSearchParams(location.search).get('mode') === 'showcase';
   if (showcaseMode) {
     stage.classList.add('showcase-mode');
     const hintText = document.getElementById('hint-text');
     if (hintText) hintText.textContent = 'Tap "Front" or "Back" to switch views · Click a button or the screen';
+  } else {
+    document.documentElement.classList.add('stage-transparent');
+    document.body.classList.add('stage-transparent');
+    stage.classList.add('stage-transparent');
+    const chromeHeader = document.querySelector('header');
+    const chromeNav = document.querySelector('nav');
+    const chromeToast = document.getElementById('toast');
+    if (chromeHeader) chromeHeader.style.display = 'none';
+    if (chromeNav) chromeNav.style.display = 'none';
+    if (chromeToast) chromeToast.style.display = 'none';
   }
 
   // Wacht kort op Google Fonts zodat het canvas scherp tekent
@@ -2004,11 +2025,13 @@
 
   const tablePlane = new THREE.Mesh(
     new THREE.CircleGeometry(14, 64),
-    new THREE.MeshStandardMaterial({
-      map: makeNightstandSurface(),
-      roughness: 0.78,
-      metalness: 0.05
-    })
+    showcaseMode
+      ? new THREE.MeshStandardMaterial({
+          map: makeNightstandSurface(),
+          roughness: 0.78,
+          metalness: 0.05
+        })
+      : new THREE.ShadowMaterial({ opacity: 0.22 })
   );
   tablePlane.rotation.x = -Math.PI / 2;
   tablePlane.position.y = -H / 2 - 0.001;
