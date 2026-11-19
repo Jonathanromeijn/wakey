@@ -2077,8 +2077,8 @@
   let rotTarget = FRONT_ANGLE;
   let elev = 0.17;
   let elevTarget = 0.17;
-  let zoomFactor = 0.84;
-  let zoomTarget = 0.84;
+  let zoomFactor = 0.68;
+  let zoomTarget = 0.68;
 
   let dragging = false;
   let pointerMoved = false;
@@ -2235,7 +2235,7 @@
       playRotaryTick();
       setDawnTarget(Math.max(0, Math.min(1, dawn + delta)));
     } else {
-      zoomTarget = Math.max(0.72, Math.min(1.38, zoomTarget + e.deltaY * 0.0008));
+      zoomTarget = Math.max(0.58, Math.min(1.38, zoomTarget + e.deltaY * 0.0008));
     }
   }, { passive: false });
 
@@ -2290,7 +2290,7 @@
     btnFront.classList.add('active');
     rotTarget = nearestAngle(FRONT_ANGLE);
     elevTarget = 0.17;
-    zoomTarget = 0.84;
+    zoomTarget = 0.68;
   });
 
   btnBack.addEventListener('click', () => {
@@ -2298,7 +2298,7 @@
     btnBack.classList.add('active');
     rotTarget = nearestAngle(BACK_ANGLE);
     elevTarget = 0.17;
-    zoomTarget = 0.84;
+    zoomTarget = 0.68;
     showToast('Tip: click the tiles on the touchscreen');
   });
 
