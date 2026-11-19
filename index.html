@@ -91,8 +91,8 @@
   .wk-demo-overlay { position: fixed; inset: 0; z-index: 100; background: #0c0a09; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
   .wk-demo-overlay.show { opacity: 1; pointer-events: auto; }
   .wk-demo-overlay iframe { width: 100%; height: 100%; border: 0; display: block; }
-  .wk-demo-overlay-close { position: absolute; top: clamp(14px, 3vw, 28px); right: clamp(14px, 3vw, 28px); z-index: 2; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,.16); background: rgba(24,20,17,.72); backdrop-filter: blur(10px); color: #f3ede4; font-size: 22px; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-  .wk-demo-overlay-close:hover { background: rgba(255,90,31,.85); border-color: rgba(255,90,31,.85); }
+  .wk-demo-overlay-close { position: absolute; top: clamp(14px, 3vw, 28px); right: clamp(14px, 3vw, 28px); z-index: 2; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,.6); background: rgba(255,255,255,.86); backdrop-filter: blur(10px); color: var(--ink); font-size: 22px; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,.35); }
+  .wk-demo-overlay-close:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
 
   .wk-hero-bottom { position: relative; z-index: 1; padding: clamp(32px, 7vw, 64px) 0 clamp(56px, 8vw, 100px); display: flex; flex-direction: column; gap: 20px; max-width: 560px; }
   .wk-sub { margin: 0; font-size: clamp(16px, 1.3vw, 18px); line-height: 1.55; color: var(--ink-muted); }
