@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="nl">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Wakey 3D — Industrieel Productontwerp</title>
+<title>Wakey 3D — Industrial Product Design</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Instrument+Sans:wght@400;500;600&display=swap">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
@@ -60,6 +60,10 @@
   }
   #stage.pointer-hover {
     cursor: pointer;
+  }
+  #stage.showcase-mode,
+  #stage.showcase-mode:active {
+    cursor: default;
   }
   #stage canvas {
     position: absolute;
@@ -156,66 +160,66 @@
 
 <div id="stage"></div>
 
-<!-- Subtiele merkheader linksboven -->
+<!-- Subtle brand header, top left -->
 <header class="fixed top-4 left-4 sm:top-6 sm:left-7 z-20 pointer-events-none flex items-center gap-3">
   <div class="glass-panel rounded-2xl px-3.5 py-2 sm:px-4 sm:py-2.5 flex items-center gap-3">
     <div class="w-2.5 h-2.5 rounded-full bg-amber-300 status-dot shadow-[0_0_10px_#fcd34d]" id="header-led"></div>
     <div>
       <div class="flex items-center gap-2">
         <span class="font-semibold tracking-wider text-xs sm:text-sm uppercase text-amber-100/95" style="font-family: 'Archivo', sans-serif;">Wakey 3D</span>
-        <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-200/80 border border-amber-400/20 font-medium">MK-II Walnoot</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-200/80 border border-amber-400/20 font-medium">MK-II Walnut</span>
       </div>
-      <p class="text-[11px] text-stone-400 hidden sm:block" id="hint-text">Sleep om te draaien · Scroll om te zoomen · Klik op knop of scherm</p>
+      <p class="text-[11px] text-stone-400 hidden sm:block" id="hint-text">Drag to rotate · Scroll to zoom · Click a button or the screen</p>
     </div>
   </div>
 </header>
 
-<!-- Feedback toast / statusmelding -->
+<!-- Feedback toast / status message -->
 <div id="toast" class="fixed top-4 right-4 sm:top-6 sm:right-7 z-20 pointer-events-none opacity-0 transition-all duration-300 translate-y-[-6px]">
   <div class="glass-panel rounded-xl px-3.5 py-2 text-xs sm:text-sm text-amber-100/95 flex items-center gap-2">
     <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-    <span id="toast-msg">Status bijgewerkt</span>
+    <span id="toast-msg">Status updated</span>
   </div>
 </div>
 
-<!-- Zwevende glazen bedieningsbalk onderaan -->
-<nav aria-label="Wekker bediening" class="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 w-[94%] max-w-3xl">
+<!-- Floating glass control bar at the bottom -->
+<nav aria-label="Alarm clock controls" class="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 w-[94%] max-w-3xl">
   <div class="glass-panel rounded-2xl sm:rounded-3xl p-2.5 sm:p-3.5 flex flex-col md:flex-row items-center justify-between gap-2.5 sm:gap-4">
 
-    <!-- Camera-standpunten -->
+    <!-- Camera viewpoints -->
     <div class="flex items-center gap-1.5 w-full md:w-auto justify-center">
-      <button id="btn-front" class="glass-pill active rounded-xl px-3 py-2 text-xs font-medium flex items-center gap-1.5 flex-1 md:flex-initial justify-center" title="Bekijk het mechanische flip-display">
+      <button id="btn-front" class="glass-pill active rounded-xl px-3 py-2 text-xs font-medium flex items-center gap-1.5 flex-1 md:flex-initial justify-center" title="View the mechanical flip display">
         <svg class="w-3.5 h-3.5 text-amber-300/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="5" width="18" height="14" rx="3"/>
           <line x1="3" y1="12" x2="21" y2="12"/>
         </svg>
-        <span>Voorkant <span class="hidden sm:inline text-stone-400">(Flip)</span></span>
+        <span>Front <span class="hidden sm:inline text-stone-400">(Flip)</span></span>
       </button>
 
-      <button id="btn-back" class="glass-pill rounded-xl px-3 py-2 text-xs font-medium flex items-center gap-1.5 flex-1 md:flex-initial justify-center" title="Draai naar het interactieve touchscreen">
+      <button id="btn-back" class="glass-pill rounded-xl px-3 py-2 text-xs font-medium flex items-center gap-1.5 flex-1 md:flex-initial justify-center" title="Rotate to the interactive touchscreen">
         <svg class="w-3.5 h-3.5 text-amber-300/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="5" width="18" height="14" rx="3"/>
           <circle cx="8" cy="12" r="2"/>
           <path d="M14 9h4M14 12h4M14 15h2"/>
         </svg>
-        <span>Achterkant <span class="hidden sm:inline text-stone-400">(Touch)</span></span>
+        <span>Back <span class="hidden sm:inline text-stone-400">(Touch)</span></span>
       </button>
 
-      <button id="btn-top" class="glass-pill rounded-xl px-3 py-2 text-xs font-medium flex items-center gap-1.5 flex-1 md:flex-initial justify-center" title="Bekijk de lichtstrip en draaiknop">
+      <button id="btn-top" class="glass-pill rounded-xl px-3 py-2 text-xs font-medium flex items-center gap-1.5 flex-1 md:flex-initial justify-center" title="View the light strip and rotary knob">
         <svg class="w-3.5 h-3.5 text-amber-300/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="8"/>
           <circle cx="12" cy="12" r="3"/>
         </svg>
-        <span>Boven</span>
+        <span>Top</span>
       </button>
     </div>
 
-    <!-- Scheidingslijn -->
+    <!-- Divider -->
     <div class="hidden md:block w-px h-7 bg-amber-100/10"></div>
 
-    <!-- Wekkerlicht (Dawn Simulator) -->
+    <!-- Wake light (Dawn Simulator) -->
     <div class="flex items-center gap-2.5 w-full md:w-auto px-1">
-      <button id="btn-dawn-toggle" class="p-1.5 rounded-lg hover:bg-white/10 transition text-amber-300" title="Start of stop zonsopgang-simulatie">
+      <button id="btn-dawn-toggle" class="p-1.5 rounded-lg hover:bg-white/10 transition text-amber-300" title="Start or stop the sunrise simulation">
         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="4"/>
           <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
@@ -223,19 +227,19 @@
       </button>
       <div class="flex flex-col flex-1 md:w-36">
         <div class="flex justify-between text-[10px] text-stone-300 mb-1">
-          <span>Wekkerlicht</span>
+          <span>Wake light</span>
           <span id="dawn-pct" class="font-mono text-amber-200">35%</span>
         </div>
-        <input id="dawn-slider" type="range" min="0" max="100" value="35" class="dawn-slider w-full" aria-label="Wekkerlicht intensiteit">
+        <input id="dawn-slider" type="range" min="0" max="100" value="35" class="dawn-slider w-full" aria-label="Wake light intensity">
       </div>
     </div>
 
-    <!-- Scheidingslijn -->
+    <!-- Divider -->
     <div class="hidden md:block w-px h-7 bg-amber-100/10"></div>
 
-    <!-- Tijd-simulatie & Flip-test -->
+    <!-- Time simulation & flip test -->
     <div class="flex items-center gap-1.5 w-full md:w-auto justify-center">
-      <button id="btn-flip-min" class="glass-pill rounded-xl px-2.5 py-2 text-xs font-medium flex items-center gap-1.5 flex-1 md:flex-initial justify-center" title="Laat de flip-klok 1 minuut vooruit klappen">
+      <button id="btn-flip-min" class="glass-pill rounded-xl px-2.5 py-2 text-xs font-medium flex items-center gap-1.5 flex-1 md:flex-initial justify-center" title="Flip the clock forward by 1 minute">
         <svg class="w-3.5 h-3.5 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="23 4 23 10 17 10"/>
           <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
@@ -243,15 +247,15 @@
         <span>+1 Min</span>
       </button>
 
-      <button id="btn-flip-hour" class="glass-pill rounded-xl px-2.5 py-2 text-xs font-medium flex items-center gap-1.5 flex-1 md:flex-initial justify-center" title="Laat uur, minuut en dag tegelijk klappen">
-        <span>+1 Uur</span>
+      <button id="btn-flip-hour" class="glass-pill rounded-xl px-2.5 py-2 text-xs font-medium flex items-center gap-1.5 flex-1 md:flex-initial justify-center" title="Flip hour, minute and day together">
+        <span>+1 Hour</span>
       </button>
 
-      <button id="btn-demo" class="glass-pill rounded-xl px-3 py-2 text-xs font-medium flex items-center gap-1.5 flex-1 md:flex-initial justify-center text-amber-200" title="Start een volledige zonsopgang- en wekkerdemo">
+      <button id="btn-demo" class="glass-pill rounded-xl px-3 py-2 text-xs font-medium flex items-center gap-1.5 flex-1 md:flex-initial justify-center text-amber-200" title="Start a full sunrise and alarm demo">
         <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
           <polygon points="6 4 20 12 6 20 6 4"/>
         </svg>
-        <span id="demo-label">Wekker-demo</span>
+        <span id="demo-label">Alarm demo</span>
       </button>
     </div>
 
@@ -263,6 +267,13 @@
 (async function () {
   const stage = document.getElementById('stage');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Showcase mode (used in the homepage overlay): no free drag-rotate, front/back view only
+  const showcaseMode = new URLSearchParams(location.search).get('mode') === 'showcase';
+  if (showcaseMode) {
+    stage.classList.add('showcase-mode');
+    const hintText = document.getElementById('hint-text');
+    if (hintText) hintText.textContent = 'Tap "Front" or "Back" to switch views · Click a button or the screen';
+  }
 
   // Wacht kort op Google Fonts zodat het canvas scherp tekent
   try {
@@ -354,7 +365,7 @@
   try {
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
   } catch (err) {
-    stage.innerHTML = '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#f3ede4;padding:24px;text-align:center;">WebGL kon niet worden gestart in deze browser.</div>';
+    stage.innerHTML = '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#f3ede4;padding:24px;text-align:center;">WebGL could not be started in this browser.</div>';
     return;
   }
 
@@ -677,7 +688,7 @@
   clock.add(bezelB);
 
   // ---------- Mechanische Flip-Kaarten ----------
-  const DAYS = ['ZO', 'MA', 'DI', 'WO', 'DO', 'VR', 'ZA'];
+  const DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   const Hc = Hi - 0.11, margin = 0.065, gap = 0.048;
   const avail = Wi - 2 * margin - 2 * gap, unit = avail / 3.05;
   const widths = [unit, unit * 1.3, unit * 0.75];
@@ -1006,32 +1017,32 @@
   backGlass.position.z = -(D / 2 + 0.014);
   clock.add(backGlass);
 
-  // Uitgebreide Touchscreen State
+  // Extended touchscreen state
   const uiState = {
     view: 'menu', // 'menu' | 'alarms' | 'light' | 'sound' | 'brightness' | 'schedule' | 'sleep' | 'meditation' | 'settings'
     alarms: [
-      { id: 0, time: '07:00', label: 'Werkdag', enabled: true },
-      { id: 1, time: '07:30', label: 'Ochtendroutine', enabled: false },
-      { id: 2, time: '07:45', label: 'Laatste wekker', enabled: false },
+      { id: 0, time: '07:00', label: 'Weekday', enabled: true },
+      { id: 1, time: '07:30', label: 'Morning routine', enabled: false },
+      { id: 2, time: '07:45', label: 'Final alarm', enabled: false },
       { id: 3, time: '08:00', label: 'Weekend', enabled: false }
     ],
-    soundPreset: 'Ochtendvogels',
+    soundPreset: 'Morning Birds',
     sounds: [
-      { name: 'Ochtendvogels', desc: 'Zachte merel & bosgeluiden', freq: [660, 880, 740] },
-      { name: 'Haan & Boerderij', desc: 'Natuurlijk ontwaken', freq: [440, 587, 523] },
-      { name: 'Klassieke Bel', desc: 'Heldere mechanische wektoon', freq: [987, 1318, 987] },
-      { name: 'Zachte Marimba', desc: 'Warme houten klanken', freq: [523, 659, 784] },
-      { name: 'Aangepast', desc: 'Eigen geüpload geluid (Mijn_Wekker.mp3)', freq: [392, 494, 587] }
+      { name: 'Morning Birds', desc: 'Soft blackbird & forest sounds', freq: [660, 880, 740] },
+      { name: 'Rooster & Farm', desc: 'A natural wake-up', freq: [440, 587, 523] },
+      { name: 'Classic Bell', desc: 'Bright mechanical wake tone', freq: [987, 1318, 987] },
+      { name: 'Soft Marimba', desc: 'Warm wooden tones', freq: [523, 659, 784] },
+      { name: 'Custom', desc: 'Your own uploaded sound (My_Alarm.mp3)', freq: [392, 494, 587] }
     ],
     brightness: 0.85,
     schedule: [
-      { day: 'MA', planned: '07:00', actual: '07:04', status: 'ok' },
-      { day: 'DI', planned: '07:00', actual: '06:58', status: 'ok' },
-      { day: 'WO', planned: '07:00', actual: '07:12', status: 'snooze' },
-      { day: 'DO', planned: '07:00', actual: '07:01', status: 'ok' },
-      { day: 'VR', planned: '07:30', actual: '07:30', status: 'ok' },
-      { day: 'ZA', planned: '08:00', actual: '08:22', status: 'snooze' },
-      { day: 'ZO', planned: '08:00', actual: '08:05', status: 'ok' }
+      { day: 'MON', planned: '07:00', actual: '07:04', status: 'ok' },
+      { day: 'TUE', planned: '07:00', actual: '06:58', status: 'ok' },
+      { day: 'WED', planned: '07:00', actual: '07:12', status: 'snooze' },
+      { day: 'THU', planned: '07:00', actual: '07:01', status: 'ok' },
+      { day: 'FRI', planned: '07:30', actual: '07:30', status: 'ok' },
+      { day: 'SAT', planned: '08:00', actual: '08:22', status: 'snooze' },
+      { day: 'SUN', planned: '08:00', actual: '08:05', status: 'ok' }
     ],
     sleepMinutes: 30,
     sleepRunning: false,
@@ -1039,16 +1050,16 @@
     meditationIndex: 0,
     meditationActive: false,
     meditations: [
-      { name: 'Ochtendrust & Focus', duration: '5 min', breath: '4-4-4 ritme · Heldere start' },
-      { name: 'Diepe Ademhaling', duration: '10 min', breath: '4-7-8 ontspanning · Kalmte' },
-      { name: 'Boswandeling', duration: '12 min', breath: 'Natuurgeluiden & zachte gloed' },
-      { name: 'Nachtelijke Stilte', duration: '15 min', breath: 'Langzame hartslag · Slaapvoorbereiding' }
+      { name: 'Morning Calm & Focus', duration: '5 min', breath: '4-4-4 rhythm · A clear start' },
+      { name: 'Deep Breathing', duration: '10 min', breath: '4-7-8 relaxation · Calm' },
+      { name: 'Forest Walk', duration: '12 min', breath: 'Nature sounds & a soft glow' },
+      { name: 'Night Stillness', duration: '15 min', breath: 'Slow heartbeat · Sleep prep' }
     ],
     settings: [
-      { key: 'format24', label: '24-uurs tijdsnotatie', value: true },
-      { key: 'flipSound', label: 'Mechanisch flip-geluid', value: true },
-      { key: 'autoNight', label: 'Auto-nachtstand scherm', value: true },
-      { key: 'snooze9', label: 'Snooze-duur (9 min)', value: true }
+      { key: 'format24', label: '24-hour time format', value: true },
+      { key: 'flipSound', label: 'Mechanical flip sound', value: true },
+      { key: 'autoNight', label: 'Auto night-mode screen', value: true },
+      { key: 'snooze9', label: 'Snooze duration (9 min)', value: true }
     ],
     snoozed: false
   };
@@ -1058,7 +1069,7 @@
     return s ? s.value : false;
   }
 
-  // "Auto-nachtstand scherm": dimt het achterscherm vanzelf tussen 22:00 en 07:00
+  // "Auto night-mode screen": dims the back screen automatically between 22:00 and 07:00
   function nightModeActive(now) {
     if (!isSettingOn('autoNight')) return false;
     const h = now.getHours();
@@ -1097,7 +1108,7 @@
     return active || null;
   }
 
-  const MONTHS = ['JAN', 'FEB', 'MRT', 'APR', 'MEI', 'JUN', 'JUL', 'AUG', 'SEP', 'OKT', 'NOV', 'DEC'];
+  const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
   function drawIcon(g, type, x, y, s, active = false) {
     g.save();
     g.translate(x, y);
@@ -1157,19 +1168,19 @@
     g.restore();
   }
 
-  // Helper voor Apple-stijl iOS groene/grijze tuimelschakelaar
+  // Helper for an Apple-style iOS green/grey toggle switch
   function drawIOSToggle(g, x, y, enabled) {
     const w = 86, h = 46, r = 23;
     ctxRR(g, x, y, w, h, r);
     g.fillStyle = enabled ? '#34c759' : '#3a3836';
     g.fill();
 
-    // Subtiele binnenrand
+    // Subtle inner border
     g.strokeStyle = enabled ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.08)';
     g.lineWidth = 1.5;
     g.stroke();
 
-    // Witte knop
+    // White knob
     const knobX = enabled ? x + w - r : x + r;
     const knobY = y + r;
     g.beginPath();
@@ -1184,7 +1195,7 @@
     g.shadowOffsetY = 0;
   }
 
-  // Helper voor terugknop rechtsboven in elk subscherm
+  // Helper for the back button, top right of every sub-screen
   function drawSubHeader(g, title, subtitle, now) {
     g.textAlign = 'left';
     g.textBaseline = 'alphabetic';
@@ -1198,7 +1209,7 @@
       g.fillText(subtitle, 675, 134);
     }
 
-    // Terug naar menu knop rechtsboven
+    // Back-to-menu button, top right
     const bx = 1165, by = 64, bw = 165, bh = 52;
     ctxRR(g, bx, by, bw, bh, 26);
     g.fillStyle = 'rgba(255, 245, 232, 0.08)';
@@ -1237,7 +1248,7 @@
     const w = sc.width, h = sc.height, g = sx;
     screenHitboxes.length = 0;
 
-    // Diepe OLED achtergrond
+    // Deep OLED background
     g.fillStyle = '#090807';
     g.fillRect(0, 0, w, h);
 
@@ -1247,15 +1258,15 @@
     g.fillStyle = vg;
     g.fillRect(0, 0, w, h);
 
-    // ---------- LINKER VAST PANEEL (Datum, Tijd & Actieve Wekker) ----------
+    // ---------- LEFT FIXED PANEL (Date, Time & Active Alarm) ----------
     g.textAlign = 'left';
     g.textBaseline = 'alphabetic';
     g.fillStyle = '#a49b90';
     g.font = '500 28px "Instrument Sans", system-ui, sans-serif';
-    g.fillText(`${DAYS[now.getDay()]} ${now.getDate()} ${MONTHS[now.getMonth()]}${nightModeActive(now) ? '  ·  Nachtstand' : ''}`, 86, 118);
+    g.fillText(`${DAYS[now.getDay()]} ${now.getDate()} ${MONTHS[now.getMonth()]}${nightModeActive(now) ? '  ·  Night mode' : ''}`, 86, 118);
 
     const nextAlarm = getNextActiveAlarm();
-    const statusText = uiState.snoozed ? 'SNOOZE 9M' : (nextAlarm ? 'WEKKER AAN' : 'GEEN WEKKER');
+    const statusText = uiState.snoozed ? 'SNOOZE 9M' : (nextAlarm ? 'ALARM ON' : 'NO ALARM');
     g.fillStyle = nextAlarm ? 'rgba(52, 199, 89, 0.16)' : 'rgba(255,255,255,0.07)';
     ctxRR(g, 405, 88, 185, 42, 21);
     g.fill();
@@ -1265,13 +1276,13 @@
     g.fillText(statusText, 497, 116);
     g.textAlign = 'left';
 
-    // Grote digitale tijd
+    // Large digital time
     const timeStr = formatTimeForScreen(now);
     g.fillStyle = '#f2ece1';
     g.font = `600 ${timeStr.length > 5 ? 132 : 176}px Archivo, "Helvetica Neue", Arial, sans-serif`;
     g.fillText(timeStr, 80, 294);
 
-    // Statuskaart linksonder (klikt direct naar Wekkers)
+    // Status card bottom left (clicks straight through to Alarms)
     ctxRR(g, 80, 336, 510, 128, 22);
     g.fillStyle = 'rgba(255, 245, 232, 0.045)';
     g.fill();
@@ -1293,15 +1304,15 @@
       drawIcon(g, 'moon', 126, 398, 52, true);
       g.fillStyle = '#ebe4d8';
       g.font = '600 29px "Instrument Sans", system-ui, sans-serif';
-      g.fillText(`Slaaptimer: nog ${minsLeft} min`, 172, 392);
+      g.fillText(`Sleep timer: ${minsLeft} min left`, 172, 392);
       g.fillStyle = '#978e84';
       g.font = '400 23px "Instrument Sans", system-ui, sans-serif';
-      g.fillText('Licht dimt geleidelijk uit', 172, 430);
+      g.fillText('Light dims gradually', 172, 430);
     } else if (nextAlarm) {
       drawIcon(g, 'alarm', 126, 398, 52, true);
       g.fillStyle = '#ebe4d8';
       g.font = '600 30px "Instrument Sans", system-ui, sans-serif';
-      g.fillText(`Volgende: ${nextAlarm.time}`, 172, 392);
+      g.fillText(`Next: ${nextAlarm.time}`, 172, 392);
       g.fillStyle = '#978e84';
       g.font = '400 23px "Instrument Sans", system-ui, sans-serif';
       g.fillText(`${nextAlarm.label} · ${uiState.soundPreset}`, 172, 430);
@@ -1309,13 +1320,13 @@
       drawIcon(g, 'alarm', 126, 398, 52, false);
       g.fillStyle = '#b8afa4';
       g.font = '600 29px "Instrument Sans", system-ui, sans-serif';
-      g.fillText('Alle wekkers staan uit', 172, 392);
+      g.fillText('All alarms are off', 172, 392);
       g.fillStyle = '#827a71';
       g.font = '400 23px "Instrument Sans", system-ui, sans-serif';
-      g.fillText('Tik hier om een wekker te kiezen', 172, 430);
+      g.fillText('Tap here to pick an alarm', 172, 430);
     }
 
-    // Verticale scheidingslijn
+    // Vertical divider
     g.strokeStyle = 'rgba(255,245,230,0.09)';
     g.lineWidth = 2;
     g.beginPath();
@@ -1323,17 +1334,17 @@
     g.lineTo(640, h - 68);
     g.stroke();
 
-    // ---------- RECHTER DYNAMISCH PANEEL ----------
+    // ---------- RIGHT DYNAMIC PANEL ----------
     if (uiState.view === 'menu') {
       const items = [
-        ['alarm', 'Wekkers', 'alarms'],
-        ['sun', 'Wekkerlicht', 'light'],
-        ['note', 'Geluid', 'sound'],
-        ['bright', 'Helderheid', 'brightness'],
-        ['cal', 'Schema', 'schedule'],
-        ['moon', 'Slaaptimer', 'sleep'],
-        ['lotus', 'Meditatie', 'meditation'],
-        ['gear', 'Instellingen', 'settings']
+        ['alarm', 'Alarms', 'alarms'],
+        ['sun', 'Wake light', 'light'],
+        ['note', 'Sound', 'sound'],
+        ['bright', 'Brightness', 'brightness'],
+        ['cal', 'Schedule', 'schedule'],
+        ['moon', 'Sleep timer', 'sleep'],
+        ['lotus', 'Meditation', 'meditation'],
+        ['gear', 'Settings', 'settings']
       ];
 
       const gx = 682, gy = 62, tw = 162, th = 198;
@@ -1374,8 +1385,8 @@
       });
 
     } else if (uiState.view === 'alarms') {
-      // 1. WEKKERS: 07:00, 07:30, 07:45, 08:00 met Apple-stijl groene/grijze schakelaar
-      drawSubHeader(g, 'Wekkers', 'Tik op de schakelaar om aan of uit te zetten', now);
+      // 1. ALARMS: 07:00, 07:30, 07:45, 08:00 with Apple-style green/grey switches
+      drawSubHeader(g, 'Alarms', 'Tap the switch to turn it on or off', now);
 
       uiState.alarms.forEach((alarm, idx) => {
         const ry = 160 + idx * 78;
@@ -1388,7 +1399,7 @@
         g.lineWidth = 1.5;
         g.stroke();
 
-        // Tijd
+        // Time
         g.fillStyle = alarm.enabled ? '#f5efe6' : '#8c847b';
         g.font = '600 36px Archivo, sans-serif';
         g.fillText(alarm.time, rx + 26, ry + 45);
@@ -1398,7 +1409,7 @@
         g.font = '400 23px "Instrument Sans", sans-serif';
         g.fillText(alarm.label, rx + 165, ry + 42);
 
-        // iOS Groene / Grijze schakelaar rechts
+        // iOS green/grey switch, right
         drawIOSToggle(g, rx + rw - 108, ry + 10, alarm.enabled);
 
         screenHitboxes.push({
@@ -1407,16 +1418,16 @@
             alarm.enabled = !alarm.enabled;
             uiState.snoozed = false;
             playRotaryTick();
-            showToast(`Wekker ${alarm.time} ${alarm.enabled ? 'aangezet' : 'uitgezet'}`);
+            showToast(`Alarm ${alarm.time} ${alarm.enabled ? 'turned on' : 'turned off'}`);
             drawScreen(now);
           }
         });
       });
 
     } else if (uiState.view === 'light') {
-      // 2. WEKKERLICHT: 0%, 15%, 30%, 50%, 75%, 100%
+      // 2. WAKE LIGHT: 0%, 15%, 30%, 50%, 75%, 100%
       const curPct = Math.round(dawnTarget * 100);
-      drawSubHeader(g, 'Wekkerlicht', `Huidige lichtsterkte: ${curPct}% (2200K warm)`, now);
+      drawSubHeader(g, 'Wake light', `Current brightness: ${curPct}% (2200K warm)`, now);
 
       const levels = [0, 15, 30, 50, 75, 100];
       levels.forEach((pct, i) => {
@@ -1434,7 +1445,7 @@
         g.lineWidth = isCurrent ? 2.5 : 1.5;
         g.stroke();
 
-        // Visueel lichtbolletje
+        // Visual light dot
         g.beginPath();
         g.arc(bx + bw / 2, by + 42, 14, 0, Math.PI * 2);
         g.fillStyle = pct === 0 ? '#3a3530' : `rgba(255, 198, 115, ${0.25 + (pct / 100) * 0.75})`;
@@ -1452,15 +1463,15 @@
             if (demoActive) stopDemo();
             setDawnTarget(pct / 100);
             playRotaryTick();
-            showToast(`Wekkerlicht op ${pct}% gezet`);
+            showToast(`Wake light set to ${pct}%`);
             drawScreen(now);
           }
         });
       });
 
     } else if (uiState.view === 'sound') {
-      // 3. GELUID: Keuzelijst met wekgeluiden + Aangepast
-      drawSubHeader(g, 'Wekgeluid', 'Tik om te selecteren en voor te luisteren', now);
+      // 3. SOUND: list of alarm sounds + Custom
+      drawSubHeader(g, 'Alarm sound', 'Tap to select and preview', now);
 
       uiState.sounds.forEach((snd, idx) => {
         const ry = 156 + idx * 64;
@@ -1502,20 +1513,20 @@
           action: () => {
             uiState.soundPreset = snd.name;
             playSoundPreview(snd.freq);
-            showToast(`Wekgeluid: ${snd.name}`);
+            showToast(`Alarm sound: ${snd.name}`);
             drawScreen(now);
           }
         });
       });
 
     } else if (uiState.view === 'brightness') {
-      // 4. HELDERHEID: Schermhelderheid van het achterste touchscreen omlaag/omhoog
+      // 4. BRIGHTNESS: back touchscreen brightness up/down
       const bPct = Math.round(uiState.brightness * 100);
-      drawSubHeader(g, 'Schermhelderheid', `OLED display niveau: ${bPct}%`, now);
+      drawSubHeader(g, 'Screen brightness', `OLED display level: ${bPct}%`, now);
 
       const barX = 765, barY = 240, barW = 475, barH = 54;
 
-      // Min-knop (-)
+      // Minus button (-)
       ctxRR(g, 675, barY, 68, barH, 16);
       g.fillStyle = 'rgba(255,255,255,0.08)';
       g.fill();
@@ -1524,7 +1535,7 @@
       g.textAlign = 'center';
       g.fillText('−', 709, barY + 39);
 
-      // Plus-knop (+)
+      // Plus button (+)
       ctxRR(g, 1262, barY, 68, barH, 16);
       g.fillStyle = 'rgba(255,255,255,0.08)';
       g.fill();
@@ -1540,7 +1551,7 @@
       g.lineWidth = 2;
       g.stroke();
 
-      // Gevulde balk
+      // Filled bar
       const fillW = Math.max(54, barW * uiState.brightness);
       ctxRR(g, barX, barY, fillW, barH, 27);
       const bGrad = g.createLinearGradient(barX, 0, barX + barW, 0);
@@ -1549,13 +1560,13 @@
       g.fillStyle = bGrad;
       g.fill();
 
-      // Duimknop
+      // Thumb knob
       g.beginPath();
       g.arc(barX + fillW - 27, barY + barH / 2, 20, 0, Math.PI * 2);
       g.fillStyle = '#ffffff';
       g.fill();
 
-      // Snelle voorkeuzen onder de balk
+      // Quick presets below the bar
       [20, 50, 80, 100].forEach((preset, idx) => {
         const px = 675 + idx * 168;
         const py = 345;
@@ -1578,7 +1589,7 @@
         });
       });
 
-      // Hitboxes voor -, + en balk
+      // Hitboxes for -, + and the bar
       screenHitboxes.push({
         x: 675, y: barY, w: 68, h: barH,
         action: () => {
@@ -1606,15 +1617,15 @@
       });
 
     } else if (uiState.view === 'schedule') {
-      // 5. SCHEMA & ONTWAAKGESCHIEDENIS
-      drawSubHeader(g, 'Weekschema & Historie', 'Geplande wektijd vs. werkelijk ontwaakt', now);
+      // 5. SCHEDULE & WAKE HISTORY
+      drawSubHeader(g, 'Weekly schedule & history', 'Planned wake time vs. actual wake-up', now);
 
-      // Kolomkoppen
+      // Column headers
       g.fillStyle = '#8e867c';
       g.font = '600 20px "Instrument Sans", sans-serif';
-      g.fillText('DAG', 690, 174);
-      g.fillText('GEPLAND', 810, 174);
-      g.fillText('ONTWAAKT', 990, 174);
+      g.fillText('DAY', 690, 174);
+      g.fillText('PLANNED', 810, 174);
+      g.fillText('WOKE UP', 990, 174);
       g.fillText('STATUS', 1190, 174);
 
       uiState.schedule.forEach((row, idx) => {
@@ -1637,21 +1648,21 @@
 
         g.fillStyle = row.status === 'ok' ? '#4ade80' : '#fbbf24';
         g.font = '500 19px "Instrument Sans", sans-serif';
-        g.fillText(row.status === 'ok' ? '● Op tijd' : '● 1x Snooze', 1185, ry + 25);
+        g.fillText(row.status === 'ok' ? '● On time' : '● 1x Snooze', 1185, ry + 25);
       });
 
     } else if (uiState.view === 'sleep') {
-      // 6. SLAAPTIMER MET RONDE SLEEP-BOOG (linksonder = 0 min, rechtsonder = 60 min)
-      drawSubHeader(g, 'Slaaptimer', 'Sleep langs de boog van linksonder (0m) naar rechtsonder (60m)', now);
+      // 6. SLEEP TIMER WITH ROUND SLEEP ARC (bottom-left = 0 min, bottom-right = 60 min)
+      drawSubHeader(g, 'Sleep timer', 'Drag along the arc from bottom-left (0m) to bottom-right (60m)', now);
 
       const cx = 920, cy = 325, radius = 128;
-      // Boog loopt met de klok mee van linksonder (0.75 * PI = 135°) via boven (1.5 * PI) naar rechtsonder (2.25 * PI = 405°)
+      // Arc runs clockwise from bottom-left (0.75 * PI = 135°) via the top (1.5 * PI) to bottom-right (2.25 * PI = 405°)
       const startAngle = Math.PI * 0.75;
       const totalSweep = Math.PI * 1.5;
       const fraction = uiState.sleepMinutes / 60;
       const currentAngle = startAngle + totalSweep * fraction;
 
-      // Achtergrond-boog
+      // Background arc
       g.beginPath();
       g.arc(cx, cy, radius, startAngle, startAngle + totalSweep, false);
       g.strokeStyle = '#26221e';
@@ -1659,7 +1670,7 @@
       g.lineCap = 'round';
       g.stroke();
 
-      // Actieve gekleurde boog
+      // Active colored arc
       if (fraction > 0.01) {
         g.beginPath();
         g.arc(cx, cy, radius, startAngle, currentAngle, false);
@@ -1672,24 +1683,24 @@
         g.stroke();
       }
 
-      // Labels linksonder (0m) en rechtsonder (60m)
+      // Labels bottom-left (0m) and bottom-right (60m)
       g.fillStyle = '#8e867c';
       g.font = '500 20px "Instrument Sans", sans-serif';
       g.textAlign = 'center';
       g.fillText('0 min', cx - radius * 0.88, cy + radius * 0.96);
       g.fillText('60 min', cx + radius * 0.88, cy + radius * 0.96);
 
-      // Grote tijd in het midden van de cirkel
+      // Large time in the center of the circle
       const displayMins = uiState.sleepRunning ? Math.ceil(uiState.sleepRemainingSec / 60) : uiState.sleepMinutes;
       g.fillStyle = '#f2ece1';
       g.font = '600 58px Archivo, sans-serif';
       g.fillText(`${displayMins}`, cx, cy + 12);
       g.fillStyle = '#a49b90';
       g.font = '500 22px "Instrument Sans", sans-serif';
-      g.fillText('minuten', cx, cy + 44);
+      g.fillText('minutes', cx, cy + 44);
       g.textAlign = 'left';
 
-      // Sleep-knopje op de boog
+      // Drag handle on the arc
       const handleX = cx + Math.cos(currentAngle) * radius;
       const handleY = cy + Math.sin(currentAngle) * radius;
       g.beginPath();
@@ -1700,7 +1711,7 @@
       g.strokeStyle = '#d99b52';
       g.stroke();
 
-      // Start / Stop knop rechts naast de cirkel
+      // Start / Stop button right of the circle
       const btnX = 1120, btnY = 275, btnW = 200, btnH = 74;
       ctxRR(g, btnX, btnY, btnW, btnH, 22);
       g.fillStyle = uiState.sleepRunning ? 'rgba(239, 68, 68, 0.22)' : 'rgba(52, 199, 89, 0.22)';
@@ -1715,15 +1726,15 @@
       g.fillText(uiState.sleepRunning ? 'Stop timer' : 'Start timer', btnX + btnW / 2, btnY + 46);
       g.textAlign = 'left';
 
-      // Hitbox voor slepen op de cirkelboog
+      // Hitbox for dragging along the circular arc
       const updateSleepFromPoint = (px, py) => {
         let ang = Math.atan2(py - cy, px - cx);
         if (ang < 0) ang += Math.PI * 2;
-        // Normaliseer t.o.v. startAngle (0.75 * PI)
+        // Normalize relative to startAngle (0.75 * PI)
         let rel = ang - startAngle;
         if (rel < 0) rel += Math.PI * 2;
 
-        // Clamp aan de uiteinden (linksonder = 0, rechtsonder = 60)
+        // Clamp at the ends (bottom-left = 0, bottom-right = 60)
         if (rel > totalSweep) {
           const distToEnd = rel - totalSweep;
           const distToStart = (Math.PI * 2) - rel;
@@ -1753,14 +1764,14 @@
           uiState.sleepRunning = !uiState.sleepRunning;
           uiState.sleepRemainingSec = uiState.sleepMinutes * 60;
           playRotaryTick();
-          showToast(uiState.sleepRunning ? `Slaaptimer gestart (${uiState.sleepMinutes} min)` : 'Slaaptimer gestopt');
+          showToast(uiState.sleepRunning ? `Sleep timer started (${uiState.sleepMinutes} min)` : 'Sleep timer stopped');
           drawScreen(now);
         }
       });
 
     } else if (uiState.view === 'meditation') {
-      // 7. MEDITATIE: 4 verschillende sessies
-      drawSubHeader(g, 'Meditatie', 'Kies een sessie met ademhalings-lichtritme', now);
+      // 7. MEDITATION: 4 different sessions
+      drawSubHeader(g, 'Meditation', 'Choose a session with a breathing light rhythm', now);
 
       uiState.meditations.forEach((med, idx) => {
         const ry = 160 + idx * 78;
@@ -1783,7 +1794,7 @@
         g.font = '400 19px "Instrument Sans", sans-serif';
         g.fillText(`${med.duration} · ${med.breath}`, rx + 24, ry + 56);
 
-        // Start / Pauze badge rechts
+        // Start / Pause badge, right
         ctxRR(g, rx + rw - 132, ry + 13, 112, 40, 20);
         g.fillStyle = isPlaying ? '#2dd4bf' : 'rgba(255,255,255,0.1)';
         g.fill();
@@ -1803,15 +1814,15 @@
               uiState.meditationActive = true;
             }
             playRotaryTick();
-            showToast(uiState.meditationActive ? `Meditatie: ${med.name}` : 'Meditatie gepauzeerd');
+            showToast(uiState.meditationActive ? `Meditation: ${med.name}` : 'Meditation paused');
             drawScreen(now);
           }
         });
       });
 
     } else if (uiState.view === 'settings') {
-      // 8. INSTELLINGEN: Aanpasbare voorkeuren met schakelaars
-      drawSubHeader(g, 'Instellingen', 'Systeem- en hardwarevoorkeuren', now);
+      // 8. SETTINGS: adjustable preferences with switches
+      drawSubHeader(g, 'Settings', 'System and hardware preferences', now);
 
       uiState.settings.forEach((st, idx) => {
         const ry = 160 + idx * 78;
@@ -1835,7 +1846,7 @@
           action: () => {
             st.value = !st.value;
             playRotaryTick();
-            showToast(`${st.label}: ${st.value ? 'Aan' : 'Uit'}`);
+            showToast(`${st.label}: ${st.value ? 'On' : 'Off'}`);
             drawScreen(now);
           }
         });
@@ -2092,7 +2103,7 @@
     updatePointerNDC(e);
     raycaster.setFromCamera(pointerNDC, camera);
 
-    // 1. Check draaiknop klik (Snooze / Dim)
+    // 1. Check rotary knob click (Snooze / Dim)
     const knobHits = raycaster.intersectObjects(knobRotator.children, true);
     if (knobHits.length > 0) {
       knobPressAnim = 1.0;
@@ -2103,24 +2114,24 @@
         if (isSettingOn('snooze9')) {
           uiState.snoozed = true;
           setDawnTarget(0.25);
-          showToast('Snooze geactiveerd (9 min) · Licht gedimd');
+          showToast('Snooze activated (9 min) · Light dimmed');
         } else {
           uiState.snoozed = false;
           const active = getNextActiveAlarm();
           if (active) active.enabled = false;
           setDawnTarget(0);
-          showToast('Wekker uitgezet (snooze staat uit)');
+          showToast('Alarm turned off (snooze is off)');
         }
       } else {
         const nextLevel = dawn > 0.7 ? 0.0 : (dawn > 0.2 ? 1.0 : 0.45);
         setDawnTarget(nextLevel);
-        showToast(`Draaiknop: Wekkerlicht ${Math.round(nextLevel * 100)}%`);
+        showToast(`Rotary knob: Wake light ${Math.round(nextLevel * 100)}%`);
       }
       drawScreen(getSimulatedNow());
       return;
     }
 
-    // 2. Check achterkant touchscreen klik
+    // 2. Check back touchscreen click
     const screenHits = raycaster.intersectObject(screenMesh);
     if (screenHits.length > 0 && screenHits[0].uv) {
       const uv = screenHits[0].uv;
@@ -2142,7 +2153,7 @@
     pointerMoved = false;
     activeSliderDrag = null;
 
-    // Controleer eerst of we op een sleepbare regelaar op het touchscreen drukken (Slaaptimer boog of Helderheid)
+    // First check whether we're pressing a draggable control on the touchscreen (Sleep timer arc or Brightness)
     updatePointerNDC(e);
     raycaster.setFromCamera(pointerNDC, camera);
     const screenHits = raycaster.intersectObject(screenMesh);
@@ -2181,16 +2192,18 @@
       const dy = e.clientY - ly;
       if (Math.hypot(e.clientX - downX, e.clientY - downY) > 5) {
         pointerMoved = true;
-        clearActiveViewButtons();
+        if (!showcaseMode) clearActiveViewButtons();
       }
-      rotY += dx * 0.0085;
-      rotTarget = rotY;
-      elev = Math.min(1.05, Math.max(0.03, elev + dy * 0.0045));
-      elevTarget = elev;
+      if (!showcaseMode) {
+        rotY += dx * 0.0085;
+        rotTarget = rotY;
+        elev = Math.min(1.05, Math.max(0.03, elev + dy * 0.0045));
+        elevTarget = elev;
+      }
       lx = e.clientX;
       ly = e.clientY;
     } else {
-      // Hover cursor feedback voor interactieve 3D-onderdelen
+      // Hover cursor feedback for interactive 3D parts
       updatePointerNDC(e);
       raycaster.setFromCamera(pointerNDC, camera);
       const hits = raycaster.intersectObjects([screenMesh, ...knobRotator.children], true);
@@ -2212,7 +2225,7 @@
   cv.addEventListener('pointerup', endPointer);
   cv.addEventListener('pointercancel', () => { dragging = false; activeSliderDrag = null; });
 
-  // Scrollwiel om soepel in/uit te zoomen (of draaiknop te draaien met Shift)
+  // Scroll wheel to smoothly zoom in/out (or rotate the knob with Shift)
   cv.addEventListener('wheel', e => {
     e.preventDefault();
     if (e.shiftKey) {
@@ -2225,7 +2238,7 @@
     }
   }, { passive: false });
 
-  // ---------- Wekkerlicht (Dawn Simulator) & Demo-status ----------
+  // ---------- Wake light (Dawn Simulator) & demo status ----------
   const dawnSlider = document.getElementById('dawn-slider');
   const dawnPct = document.getElementById('dawn-pct');
   const headerLed = document.getElementById('header-led');
@@ -2255,13 +2268,17 @@
     if (demoActive) stopDemo();
     const next = dawnTarget < 0.5 ? 1.0 : 0.0;
     setDawnTarget(next);
-    showToast(next > 0.5 ? 'Wekkerlicht op 100% ochtendgloed' : 'Wekkerlicht gedoofd (Nachtmodus)');
+    showToast(next > 0.5 ? 'Wake light at 100% morning glow' : 'Wake light off (night mode)');
   });
 
-  // ---------- UI Knoppen & Camera Standpunten ----------
+  // ---------- UI buttons & camera viewpoints ----------
   const btnFront = document.getElementById('btn-front');
   const btnBack = document.getElementById('btn-back');
   const btnTop = document.getElementById('btn-top');
+
+  if (showcaseMode) {
+    btnTop.style.display = 'none';
+  }
 
   function clearActiveViewButtons() {
     [btnFront, btnBack, btnTop].forEach(b => b.classList.remove('active'));
@@ -2281,7 +2298,7 @@
     rotTarget = nearestAngle(BACK_ANGLE);
     elevTarget = 0.16;
     zoomTarget = 0.96;
-    showToast('Tip: Klik op de tegels van het touchscreen');
+    showToast('Tip: click the tiles on the touchscreen');
   });
 
   btnTop.addEventListener('click', () => {
@@ -2292,19 +2309,19 @@
     zoomTarget = 0.98;
   });
 
-  // Tijd-simulatie knoppen
+  // Time simulation buttons
   document.getElementById('btn-flip-min').addEventListener('click', () => {
     demoOffsetMinutes += 1;
     knobRotation += 0.35;
     tick(true);
-    showToast('Tijd +1 minuut');
+    showToast('Time +1 minute');
   });
 
   document.getElementById('btn-flip-hour').addEventListener('click', () => {
     demoOffsetMinutes += 60;
     knobRotation += 0.85;
     tick(true);
-    showToast('Tijd +1 uur');
+    showToast('Time +1 hour');
   });
 
   const btnDemo = document.getElementById('btn-demo');
@@ -2317,9 +2334,9 @@
     demoLabel.textContent = 'Stop demo';
     setDawnTarget(0.05);
     dawn = 0.05;
-    showToast('Zonsopgang & flip-klok demo gestart');
+    showToast('Sunrise & flip-clock demo started');
 
-    // Laat de zonsopgang oplopen en de klok elke 1.2s verspringen
+    // Ramp up the sunrise and flip the clock every 1.2s
     setDawnTarget(1.0);
     demoInterval = setInterval(() => {
       demoOffsetMinutes += 1;
@@ -2331,7 +2348,7 @@
   function stopDemo() {
     demoActive = false;
     btnDemo.classList.remove('active');
-    demoLabel.textContent = 'Wekker-demo';
+    demoLabel.textContent = 'Alarm demo';
     clearInterval(demoInterval);
     demoInterval = null;
   }
@@ -2339,13 +2356,13 @@
   btnDemo.addEventListener('click', () => {
     if (demoActive) {
       stopDemo();
-      showToast('Wekker-demo gestopt');
+      showToast('Alarm demo stopped');
     } else {
       startDemo();
     }
   });
 
-  // ---------- Klok & Maanfase Berekening ----------
+  // ---------- Clock & moon phase calculation ----------
   function moonPhase(d) {
     const days = (d.getTime() - Date.UTC(2000, 0, 6, 18, 14)) / 86400000;
     return ((days / 29.530588853) % 1 + 1) % 1;
@@ -2383,7 +2400,7 @@
   }
   resize();
 
-  // ---------- Animatielus ----------
+  // ---------- Animation loop ----------
   const stripColorOff = new THREE.Color(0x3a2a1c);
   const stripColorOn = new THREE.Color(0xffe0b2);
   const ledOff = new THREE.Color(0x4a3828);
@@ -2395,7 +2412,7 @@
     const dt = Math.min(0.05, (nowTime - lastTime) / 1000);
     lastTime = nowTime;
 
-    // Camera & draai-interpolatie
+    // Camera & rotation interpolation
     if (!dragging) {
       const lerpSpeed = reduceMotion ? 60 : 4.5;
       rotY += (rotTarget - rotY) * Math.min(1, dt * lerpSpeed);
@@ -2404,14 +2421,14 @@
     zoomFactor += (zoomTarget - zoomFactor) * Math.min(1, dt * 6);
     clock.rotation.y = rotY;
 
-    // Draaiknop animatie (indrukken + draaien)
+    // Rotary knob animation (press + turn)
     knobRotator.rotation.y += (knobRotation - knobRotator.rotation.y) * Math.min(1, dt * 14);
     if (knobPressAnim > 0) {
       knobPressAnim = Math.max(0, knobPressAnim - dt * 5.5);
       knobRotator.position.y = 0.014 - Math.sin(knobPressAnim * Math.PI) * 0.008;
     }
 
-    // Responsieve camera-afstand zodat de wekker altijd prominent gecentreerd staat
+    // Responsive camera distance so the clock always stays prominently centered
     const vfov = camera.fov * Math.PI / 180;
     const hfov = 2 * Math.atan(Math.tan(vfov / 2) * (camera.aspect || 1.33));
     const baseDist = Math.max(2.35 / Math.tan(hfov / 2), 1.45 / Math.tan(vfov / 2), 4.8);
@@ -2420,7 +2437,7 @@
     camera.position.set(0, Math.sin(elev) * dist, Math.cos(elev) * dist);
     camera.lookAt(0, 0, 0);
 
-    // Wekkerlicht (Dawn Simulator) interpolatie & Slaaptimer aftellen
+    // Wake light (Dawn Simulator) interpolation & sleep timer countdown
     if (uiState.sleepRunning) {
       uiState.sleepRemainingSec = Math.max(0, uiState.sleepRemainingSec - dt);
       const ratio = uiState.sleepRemainingSec / Math.max(1, uiState.sleepMinutes * 60);
@@ -2428,7 +2445,7 @@
       if (uiState.sleepRemainingSec <= 0) {
         uiState.sleepRunning = false;
         setDawnTarget(0);
-        showToast('Slaaptimer afgelopen · Welterusten');
+        showToast('Sleep timer finished · Good night');
         drawScreen(getSimulatedNow());
       }
     }
@@ -2440,7 +2457,7 @@
       dawnPct.textContent = `${Math.round(dawn * 100)}%`;
     }
 
-    // Optionele ademhalingspuls tijdens meditatie
+    // Optional breathing pulse during meditation
     let pulse = 0;
     if (uiState.meditationActive) {
       pulse = Math.sin(nowTime * 0.0012) * 0.14;
@@ -2465,7 +2482,7 @@
     requestAnimationFrame(frame);
   }
 
-  // Start direct zonder te wachten op window.load (omdat het script al async draait)
+  // Start immediately without waiting for window.load (the script already runs async)
   tick(true);
   requestAnimationFrame(frame);
 })();
